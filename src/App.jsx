@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { RamadanProvider } from './context/RamadanContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/layout/Layout';
-import DayCard from './components/tracker/DayCard';
+import DayTracker from './components/tracker/DayTracker';
 import Calendar from './components/planner/Calendar';
 import StreakCounter from './components/stats/StreakCounter';
 import Dashboard from './components/dashboard/Dashboard';
@@ -29,7 +29,7 @@ function App() {
       <ThemeProvider>
         <RamadanProvider>
           <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-            {activeTab === 'tracker' && <DayCard />}
+            {activeTab === 'tracker' && <DayTracker />}
             {activeTab === 'planner' && <Calendar />}
             {activeTab === 'stats' && <StreakCounter />}
             {activeTab === 'dashboard' && <Dashboard />}

@@ -1,0 +1,249 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRamadan } from '../../context/RamadanContext';
+import { useTheme } from '../../context/ThemeContext';
+import Icon from '../Icon';
+import ActivityItem from './ActivityItem';
+import QuranTracker from './QuranTracker';
+import GoalInput from '../planner/GoalInput';
+
+const toBengali = (num) => {
+  const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return num.toString().split('').map(d => bengaliDigits[parseInt(d)] || d).join('');
+};
+
+export default function DayTracker() {
+  const { 
+    state, 
+    getDayData, 
+    setActivityValue, 
+    getDailyScore, 
+    getDailyProgress, 
+    getCategoryActivities,
+    isLast10Days,
+    updateQuranTracker,
+    CATEGORIES,
+    quranTracker,
+    setCurrentDay
+  } = useRamadan();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [showQuran, setShowQuran] = useState(false);
+
+  const currentDay = state.currentDay;
+  const dayData = getDayData(currentDay);
+  const isLast10 = isLast10Days(currentDay);
+  const dailyScore = getDailyScore(currentDay);
+  const dailyProgress = getDailyProgress(currentDay);
+
+  const categories = Object.values(CATEGORIES);
+
+  const getCategoryProgress = (catId) => {
+    const activities = getCategoryActivities(catId);
+    const completed = activities.filter(a => {
+      if (a.onlyLast10 && !isLast10 && currentDay < 21) return false;
+      const value = dayData?.activities?.[a.id];
+      if (a.inputType === 'boolean') return value;
+      if (a.inputType === 'text') return value?.length > 10;
+      if (a.inputType === 'scale') return value >= 3;
+      if (a.inputType === 'counter' || a.inputType === 'number') return value > 0;
+      return false;
+    }).length;
+    
+    const total = activities.filter(a => !a.onlyLast10 || isLast10 || currentDay >= 21).length;
+    return { completed, total, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
+  };
+
+  const overallProgress = () => {
+    let completed = 0, total = 0;
+    categories.forEach(cat => {
+      const p = getCategoryProgress(cat.id);
+      completed += p.completed;
+      total += p.total;
+    });
+    return { completed, total, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
+  };
+
+  const progress = overallProgress();
+
+  return (
+    <div className="space-y-3">
+      {/* Header */}
+      <div className={`rounded-xl p-3 border sticky top-16 z-30 ${
+        isDark ? 'bg-emerald-900/90 backdrop-blur-sm border-white/10' : 'bg-white/90 backdrop-blur-sm border-emerald-100'
+      }`}>
+        {/* Day Navigation */}
+        <div className="flex items-center justify-between mb-2">
+          <button
+            onClick={() => setCurrentDay(Math.max(1, currentDay - 1))}
+            disabled={currentDay === 1}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              isDark ? 'bg-white/10 hover:bg-white/20' : 'bg-emerald-100 hover:bg-emerald-200'
+            } ${currentDay === 1 ? 'opacity-30' : ''}`}
+          >
+            <Icon name="chevronLeft" className="text-sm" />
+          </button>
+          
+          <div className="text-center">
+            <h2 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>
+              রমজান {toBengali(currentDay)}
+            </h2>
+            {isLast10 && (
+              <span className="text-xs text-amber-400 font-medium">শেষ ১০ দিন</span>
+            )}
+          </div>
+          
+          <button
+            onClick={() => setCurrentDay(Math.min(30, currentDay + 1))}
+            disabled={currentDay === 30}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              isDark ? 'bg-white/10 hover:bg-white/20' : 'bg-emerald-100 hover:bg-emerald-200'
+            } ${currentDay === 30 ? 'opacity-30' : ''}`}
+          >
+            <Icon name="chevronRight" className="text-sm" />
+          </button>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="flex items-center gap-2">
+          <div className={`flex-1 h-2 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-emerald-100'}`}>
+            <motion.div 
+              className="h-full bg-gradient-to-r from-emerald-400 to-amber-400 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress.percentage}%` }}
+            />
+          </div>
+          <span className={`text-xs font-bold whitespace-nowrap ${isDark ? 'text-white' : 'text-emerald-700'}`}>
+            {toBengali(progress.completed)}/{toBengali(progress.total)}
+          </span>
+        </div>
+      </div>
+
+      {/* Quran Toggle */}
+      <button
+        onClick={() => setShowQuran(!showQuran)}
+        className={`w-full rounded-xl p-3 border flex items-center justify-between ${
+          isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <Icon name="bookQuran" className="text-purple-400" />
+          <span className={`font-medium ${isDark ? 'text-white' : 'text-purple-900'}`}>
+            📖 কুরআন পড়ার ট্র্যাকার
+          </span>
+        </div>
+        <Icon name={showQuran ? 'chevronLeft' : 'chevronRight'} className={`text-sm ${isDark ? 'text-white/50' : 'text-purple-400'}`} />
+      </button>
+
+      <AnimatePresence>
+        {showQuran && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+          >
+            <QuranTracker tracker={quranTracker} onUpdate={updateQuranTracker} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Category Tabs */}
+      <div className={`rounded-xl p-2 border flex gap-1 overflow-x-auto ${
+        isDark ? 'bg-white/5 border-white/10' : 'bg-emerald-50 border-emerald-100'
+      }`}>
+        <button
+          onClick={() => setActiveCategory('all')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+            activeCategory === 'all'
+              ? isDark ? 'bg-white text-emerald-900' : 'bg-emerald-600 text-white'
+              : isDark ? 'text-white/70 hover:bg-white/10' : 'text-emerald-700 hover:bg-emerald-100'
+          }`}
+        >
+          সব
+        </button>
+        {categories.map(cat => {
+          const p = getCategoryProgress(cat.id);
+          return (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex items-center gap-1 transition-colors ${
+                activeCategory === cat.id
+                  ? isDark ? 'bg-white text-emerald-900' : 'bg-emerald-600 text-white'
+                  : isDark ? 'text-white/70 hover:bg-white/10' : 'text-emerald-700 hover:bg-emerald-100'
+              }`}
+            >
+              <Icon name={cat.icon} className="text-xs" style={{ color: activeCategory === cat.id ? 'inherit' : cat.color }} />
+              {p.completed}/{p.total}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Activity List */}
+      <div className="space-y-2">
+        {activeCategory === 'all' ? (
+          categories.map(cat => {
+            const activities = getCategoryActivities(cat.id).filter(a => !a.onlyLast10 || isLast10 || currentDay >= 21);
+            if (activities.length === 0) return null;
+            
+            const p = getCategoryProgress(cat.id);
+            
+            return (
+              <div key={cat.id} className={`rounded-xl border overflow-hidden ${
+                isDark ? 'bg-white/5 border-white/10' : 'bg-white border-emerald-100'
+              }`}>
+                <div 
+                  className="px-3 py-2 flex items-center justify-between"
+                  style={{ backgroundColor: `${cat.color}15` }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon name={cat.icon} className="text-sm" style={{ color: cat.color }} />
+                    <span className={`font-medium text-sm ${isDark ? 'text-white' : 'text-emerald-900'}`}>
+                      {cat.name}
+                    </span>
+                  </div>
+                  <span className={`text-xs ${isDark ? 'text-white/50' : 'text-emerald-500'}`}>
+                    {p.completed}/{p.total}
+                  </span>
+                </div>
+                <div className="p-2 space-y-1.5">
+                  {activities.map(activity => (
+                    <ActivityItem
+                      key={activity.id}
+                      activity={activity}
+                      value={dayData?.activities?.[activity.id]}
+                      onChange={(value) => setActivityValue(currentDay, activity.id, value)}
+                      dayNumber={currentDay}
+                      isLast10Days={isLast10}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          getCategoryActivities(activeCategory)
+            .filter(a => !a.onlyLast10 || isLast10 || currentDay >= 21)
+            .map(activity => (
+              <ActivityItem
+                key={activity.id}
+                activity={activity}
+                value={dayData?.activities?.[activity.id]}
+                onChange={(value) => setActivityValue(currentDay, activity.id, value)}
+                dayNumber={currentDay}
+                isLast10Days={isLast10}
+              />
+            ))
+        )}
+      </div>
+
+      {/* Goal & Notes */}
+      <GoalInput />
+      
+      <div className="h-4" />
+    </div>
+  );
+}

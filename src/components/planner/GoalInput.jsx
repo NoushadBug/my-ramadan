@@ -3,8 +3,13 @@ import { motion } from 'framer-motion';
 import { useRamadan } from '../../context/RamadanContext';
 import { useTheme } from '../../context/ThemeContext';
 
+const toBengali = (num) => {
+  const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return num.toString().split('').map(d => bengaliDigits[parseInt(d)] || d).join('');
+};
+
 export default function GoalInput() {
-  const { state, setCustomGoal, setNotes, getDayData, getBengaliNumber } = useRamadan();
+  const { state, setCustomGoal, setNotes, getDayData } = useRamadan();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
@@ -42,25 +47,25 @@ export default function GoalInput() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className={`backdrop-blur-sm rounded-2xl p-6 border space-y-6 ${
+      className={`backdrop-blur-sm rounded-2xl p-4 border space-y-4 ${
         isDark 
           ? 'bg-white/10 border-white/10' 
           : 'bg-white/80 border-emerald-100 shadow-lg'
       }`}
     >
-      <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>
-        দিন {getBengaliNumber(currentDay)} - লক্ষ্য ও নোট
+      <h2 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>
+        দিন {toBengali(currentDay)} - লক্ষ্য ও নোট
       </h2>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <label className={`block text-sm mb-2 ${isDark ? 'text-white/70' : 'text-emerald-700'}`}>আজকের লক্ষ্য</label>
+          <label className={`block text-xs mb-1 ${isDark ? 'text-white/70' : 'text-emerald-700'}`}>আজকের লক্ষ্য</label>
           <input
             type="text"
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
-            placeholder="আজকের জন্য একটি লক্ষ্য নির্ধারণ করুন..."
-            className={`w-full rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all ${
+            placeholder="আজকের জন্য একটি লক্ষ্য..."
+            className={`w-full rounded-lg px-3 py-2 text-sm ${
               isDark 
                 ? 'bg-white/10 border border-white/20 text-white placeholder-white/40' 
                 : 'bg-white border border-emerald-200 text-emerald-900 placeholder-emerald-400'
@@ -69,13 +74,13 @@ export default function GoalInput() {
         </div>
 
         <div>
-          <label className={`block text-sm mb-2 ${isDark ? 'text-white/70' : 'text-emerald-700'}`}>নোটস</label>
+          <label className={`block text-xs mb-1 ${isDark ? 'text-white/70' : 'text-emerald-700'}`}>নোট</label>
           <textarea
             value={notes}
             onChange={(e) => setNotesLocal(e.target.value)}
-            placeholder="আজকের অভিজ্ঞতা লিখুন..."
-            rows={4}
-            className={`w-full rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all resize-none ${
+            placeholder="দ্রুত নোট..."
+            rows={2}
+            className={`w-full rounded-lg px-3 py-2 text-sm resize-none ${
               isDark 
                 ? 'bg-white/10 border border-white/20 text-white placeholder-white/40' 
                 : 'bg-white border border-emerald-200 text-emerald-900 placeholder-emerald-400'
@@ -83,17 +88,6 @@ export default function GoalInput() {
           />
         </div>
       </div>
-
-      {dayData?.customGoal && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className={`pt-4 border-t ${isDark ? 'border-white/10' : 'border-emerald-100'}`}
-        >
-          <p className={`text-xs mb-1 ${isDark ? 'text-white/50' : 'text-emerald-500'}`}>বর্তমান লক্ষ্য:</p>
-          <p className={`font-medium ${isDark ? 'text-white' : 'text-emerald-900'}`}>{dayData.customGoal}</p>
-        </motion.div>
-      )}
     </motion.div>
   );
 }

@@ -1,24 +1,37 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
 import { getRamadanDates } from '../utils/dateUtils';
-import { DEFAULT_ACTS, getEmptyActs } from '../data/acts';
+import { RAMADAN_ACTIVITIES, CATEGORIES, INPUT_TYPES, calculateScore, getAllActivities, getDefaultValue } from '../data/activities';
+import { QURAN_TRACKER, getInitialQuranTracker, QURAN_TRACKING_STORAGE_KEY } from '../data/quranTracker';
 
 const RamadanContext = createContext(null);
 
 const STORAGE_KEY = 'my-ramadan-data';
+
+const getInitialDayData = () => {
+  const allActivities = getAllActivities();
+  const activitiesData = {};
+  
+  allActivities.forEach(activity => {
+    activitiesData[activity.id] = getDefaultValue(activity.inputType);
+  });
+  
+  return {
+    activities: activitiesData,
+    reflection: '',
+    customGoal: '',
+    notes: ''
+  };
+};
 
 const getInitialData = () => {
   const year = 2026;
   const days = {};
   const ramadanDates = getRamadanDates(year);
   
-  const defaultActIds = DEFAULT_ACTS.map(act => act.id);
-  
   ramadanDates.forEach(({ day, date }) => {
     days[day] = {
       date,
-      acts: getEmptyActs(defaultActIds),
-      customGoal: '',
-      notes: ''
+      ...getInitialDayData()
     };
   });
 
@@ -28,29 +41,43 @@ const getInitialData = () => {
     days,
     streak: 0,
     longestStreak: 0,
-    acts: DEFAULT_ACTS
+    badges: [],
+    quranTracker: getInitialQuranTracker()
   };
 };
 
 function ramadanReducer(state, action) {
   switch (action.type) {
-    case 'TOGGLE_ACT': {
-      const { day, actId } = action.payload;
+    case 'SET_ACTIVITY_VALUE': {
+      const { day, actId, value } = action.payload;
       const dayData = state.days[day];
-      const newActs = { ...dayData.acts, [actId]: !dayData.acts[actId] };
       
-      const completedCount = Object.values(newActs).filter(Boolean).length;
-      const streak = completedCount > 0 ? state.streak + 1 : state.streak;
-      const longestStreak = Math.max(state.longestStreak, streak);
-
       return {
         ...state,
         days: {
           ...state.days,
-          [day]: { ...dayData, acts: newActs }
-        },
-        streak,
-        longestStreak
+          [day]: {
+            ...dayData,
+            activities: {
+              ...dayData.activities,
+              [actId]: value
+            }
+          }
+        }
+      };
+    }
+
+    case 'SET_REFLECTION': {
+      const { day, reflection } = action.payload;
+      return {
+        ...state,
+        days: {
+          ...state.days,
+          [day]: {
+            ...state.days[day],
+            reflection
+          }
+        }
       };
     }
 
@@ -79,64 +106,32 @@ function ramadanReducer(state, action) {
       };
     }
 
-    case 'ADD_ACT': {
-      const newAct = action.payload;
-      const newActs = [...(state.acts || DEFAULT_ACTS), newAct];
-      
-      const newDays = {};
-      Object.keys(state.days).forEach(day => {
-        newDays[day] = {
-          ...state.days[day],
-          acts: {
-            ...state.days[day].acts,
-            [newAct.id]: false
-          }
-        };
-      });
-
+    case 'UPDATE_QURAN_TRACKER': {
       return {
         ...state,
-        acts: newActs,
-        days: newDays
+        quranTracker: action.payload
       };
     }
 
-    case 'REMOVE_ACT': {
-      const actId = action.payload;
-      const newActs = (state.acts || DEFAULT_ACTS).filter(act => act.id !== actId);
-      
-      const newDays = {};
-      Object.keys(state.days).forEach(day => {
-        const { [actId]: removed, ...remainingActs } = state.days[day].acts;
-        newDays[day] = {
-          ...state.days[day],
-          acts: remainingActs
-        };
-      });
-
+    case 'ADD_BADGE': {
+      const badge = action.payload;
+      if (state.badges?.includes(badge)) return state;
       return {
         ...state,
-        acts: newActs,
-        days: newDays
+        badges: [...(state.badges || []), badge]
       };
-    }
-
-    case 'UPDATE_ACT': {
-      const { id, name, icon } = action.payload;
-      const newActs = (state.acts || DEFAULT_ACTS).map(act => 
-        act.id === id ? { ...act, name, icon } : act
-      );
-      return { ...state, acts: newActs };
     }
 
     case 'RESET_DAY': {
       const { day } = action.payload;
-      const actIds = (state.acts || DEFAULT_ACTS).map(act => act.id);
       return {
         ...state,
         days: {
           ...state.days,
-          [day]: { ...state.days[day], acts: getEmptyActs(actIds), customGoal: '', notes: '' }
+          [day]: {
+            ...state.days[day],
+            ...getInitialDayData()
+          }
         }
       };
     }
@@ -156,8 +151,8 @@ export function RamadanProvider({ children }) {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed.year === 2026) {
-          if (!parsed.acts) {
-            parsed.acts = DEFAULT_ACTS;
+          if (!parsed.quranTracker) {
+            parsed.quranTracker = getInitialQuranTracker();
           }
           return parsed;
         }
@@ -172,81 +167,136 @@ export function RamadanProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  const toggleAct = (day, actId) => dispatch({ type: 'TOGGLE_ACT', payload: { day, actId } });
+  const setActivityValue = (day, actId, value) => {
+    dispatch({ type: 'SET_ACTIVITY_VALUE', payload: { day, actId, value } });
+  };
+  
+  const setReflection = (day, reflection) => {
+    dispatch({ type: 'SET_REFLECTION', payload: { day, reflection } });
+  };
+
   const setCurrentDay = (day) => dispatch({ type: 'SET_CURRENT_DAY', payload: day });
   const setCustomGoal = (day, goal) => dispatch({ type: 'SET_CUSTOM_GOAL', payload: { day, goal } });
   const setNotes = (day, notes) => dispatch({ type: 'SET_NOTES', payload: { day, notes } });
-  const addAct = (act) => dispatch({ type: 'ADD_ACT', payload: act });
-  const removeAct = (actId) => dispatch({ type: 'REMOVE_ACT', payload: actId });
-  const updateAct = (id, name, icon) => dispatch({ type: 'UPDATE_ACT', payload: { id, name, icon } });
+  const updateQuranTracker = (tracker) => dispatch({ type: 'UPDATE_QURAN_TRACKER', payload: tracker });
   const resetDay = (day) => dispatch({ type: 'RESET_DAY', payload: { day } });
   const resetAll = () => dispatch({ type: 'RESET_ALL' });
 
   const getDayData = (day) => state.days[day];
-  const getActs = () => state.acts || DEFAULT_ACTS;
-  const getCompletedActs = (day) => {
-    const acts = state.days[day]?.acts || {};
-    return Object.values(acts).filter(Boolean).length;
+  
+  const getActivityValue = (day, actId) => {
+    return state.days[day]?.activities?.[actId] || false;
   };
 
-  const getTotalCompleted = () => {
+  const getCompletedActivitiesCount = (day) => {
+    const dayData = state.days[day];
+    if (!dayData?.activities) return 0;
+    
+    let count = 0;
+    const allActivities = getAllActivities();
+    
+    allActivities.forEach(activity => {
+      const value = dayData.activities[activity.id];
+      if (activity.inputType === 'boolean') {
+        if (value) count++;
+      } else if (activity.inputType === 'text') {
+        if (value && value.length > 10) count++;
+      } else if (activity.inputType === 'scale') {
+        if (value >= 3) count++;
+      } else if (activity.inputType === 'counter' || activity.inputType === 'number') {
+        if (value > 0) count++;
+      }
+    });
+    
+    return count;
+  };
+
+  const getTotalActivities = () => getAllActivities().length;
+
+  const getDailyScore = (day) => {
+    const dayData = state.days[day];
+    if (!dayData?.activities) return 0;
+    
+    let score = 0;
+    const allActivities = getAllActivities();
+    
+    allActivities.forEach(activity => {
+      if (activity.onlyLast10 && day < 21) return;
+      const value = dayData.activities[activity.id];
+      score += calculateScore(activity, value);
+    });
+    
+    return Math.round(score);
+  };
+
+  const getTotalScore = () => {
     let total = 0;
     for (let i = 1; i <= 30; i++) {
-      total += getCompletedActs(i);
+      total += getDailyScore(i);
     }
     return total;
   };
 
-  const getTotalActs = () => {
-    const actsCount = (state.acts || DEFAULT_ACTS).length;
-    return 30 * actsCount;
-  };
-
   const getProgress = () => {
-    const total = getTotalCompleted();
-    const max = getTotalActs();
-    return max > 0 ? Math.round((total / max) * 100) : 0;
+    const totalMaxScore = getAllActivities().reduce((sum, a) => sum + a.weight * (a.inputType === 'scale' ? 5 : 1), 0);
+    const totalScore = getTotalScore();
+    return totalMaxScore > 0 ? Math.round((totalScore / totalMaxScore) * 100) : 0;
   };
 
   const getDailyProgress = (day) => {
-    const acts = getActs();
-    const completed = getCompletedActs(day);
-    return acts.length > 0 ? Math.round((completed / acts.length) * 100) : 0;
+    const dayActivities = getAllActivities().filter(a => !a.onlyLast10 || day >= 21);
+    const maxScore = dayActivities.reduce((sum, a) => sum + a.weight * (a.inputType === 'scale' ? 5 : 1), 0);
+    const dayScore = getDailyScore(day);
+    return maxScore > 0 ? Math.round((dayScore / maxScore) * 100) : 0;
   };
 
-  const getDayStats = (day) => {
-    const acts = getActs();
-    const dayActs = state.days[day]?.acts || {};
-    const completed = acts.filter(act => dayActs[act.id]).length;
-    const missed = acts.filter(act => !dayActs[act.id]).length;
-    return { completed, missed, total: acts.length };
+  const getStreak = () => {
+    let streak = 0;
+    for (let i = 1; i <= 30; i++) {
+      if (getDailyProgress(i) > 30) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const isLast10Days = (day) => day >= 21;
+
+  const getCategories = () => CATEGORIES;
+
+  const getCategoryActivities = (categoryId) => {
+    return RAMADAN_ACTIVITIES[categoryId] || [];
   };
 
   return (
     <RamadanContext.Provider value={{
       state,
-      toggleAct,
+      setActivityValue,
+      setReflection,
       setCurrentDay,
       setCustomGoal,
       setNotes,
-      addAct,
-      removeAct,
-      updateAct,
+      updateQuranTracker,
       resetDay,
       resetAll,
       getDayData,
-      getActs,
-      getCompletedActs,
-      getTotalCompleted,
-      getTotalActs,
+      getActivityValue,
+      getCompletedActivitiesCount,
+      getTotalActivities,
+      getDailyScore,
+      getTotalScore,
       getProgress,
       getDailyProgress,
-      getDayStats,
-      getBengaliNumber: (num) => {
-        const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-        return num.toString().split('').map(d => bengaliDigits[parseInt(d)]).join('');
-      },
-      getRamadanDates
+      getStreak,
+      isLast10Days,
+      getCategories,
+      getCategoryActivities,
+      getAllActivities,
+      quranTracker: state.quranTracker,
+      CATEGORIES,
+      INPUT_TYPES
     }}>
       {children}
     </RamadanContext.Provider>
