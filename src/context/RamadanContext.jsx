@@ -7,6 +7,19 @@ const RamadanContext = createContext(null);
 
 const STORAGE_KEY = 'my-ramadan-data';
 
+const DEFAULT_CHECKLIST = [
+  'fajr_jamat',
+  'dhuhr_jamat',
+  'asr_jamat',
+  'maghrib_jamat',
+  'isha_jamat',
+  'tarawih',
+  'quran_daily',
+  'morning_dhikr',
+  'evening_dhikr',
+  'tahajjud'
+];
+
 const getInitialDayData = () => {
   const allActivities = getAllActivities();
   const activitiesData = {};
@@ -43,7 +56,8 @@ const getInitialData = () => {
     longestStreak: 0,
     badges: [],
     quranTracker: getInitialQuranTracker(),
-    quranLogs: [] // New state for detailed logs
+    quranLogs: [],
+    checklistConfig: DEFAULT_CHECKLIST // Initialize with default list
   };
 };
 
@@ -122,6 +136,48 @@ function ramadanReducer(state, action) {
       };
     }
 
+    case 'UPDATE_CHECKLIST_CONFIG': {
+      const { config } = action.payload;
+      return {
+        ...state,
+        checklistConfig: config
+      };
+    }
+
+    case 'ADD_CHECKLIST_ITEM': {
+      const { activityId } = action.payload;
+      if (state.checklistConfig.includes(activityId)) return state;
+      return {
+        ...state,
+        checklistConfig: [...state.checklistConfig, activityId]
+      };
+    }
+
+    case 'REMOVE_CHECKLIST_ITEM': {
+      const { activityId } = action.payload;
+      return {
+        ...state,
+        checklistConfig: state.checklistConfig.filter(id => id !== activityId)
+      };
+    }
+
+    case 'MOVE_CHECKLIST_ITEM': {
+      const { index, direction } = action.payload; // direction: -1 (up) or 1 (down)
+      const newConfig = [...state.checklistConfig];
+      const newIndex = index + direction;
+
+      if (newIndex < 0 || newIndex >= newConfig.length) return state;
+
+      const item = newConfig[index];
+      newConfig.splice(index, 1);
+      newConfig.splice(newIndex, 0, item);
+
+      return {
+        ...state,
+        checklistConfig: newConfig
+      };
+    }
+
     case 'ADD_BADGE': {
       const badge = action.payload;
       if (state.badges?.includes(badge)) return state;
@@ -167,6 +223,9 @@ export function RamadanProvider({ children }) {
           if (!parsed.quranLogs) {
             parsed.quranLogs = [];
           }
+          if (!parsed.checklistConfig) {
+            parsed.checklistConfig = DEFAULT_CHECKLIST;
+          }
           return parsed;
         }
       }
@@ -190,15 +249,16 @@ export function RamadanProvider({ children }) {
     const startDate = new Date('2026-02-19T00:00:00');
     const now = new Date();
 
-    // For testing/demo purposes, if we are not in 2026, we might want to simulate
-    // But adhering to strict logic first:
+    // Calculate difference in days
     const diffTime = now - startDate;
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
     if (diffDays >= 1 && diffDays <= 30) {
       dispatch({ type: 'SET_CURRENT_DAY', payload: diffDays });
     }
-    // If not in range, we keep default (1) or user selected day
+    // If we are testing/developing before 2026, we can stick to Day 1
+    // or calculate based on a simulated start date for dev.
+    // For now, adhere to the logic: if not in range, stay on default (1) or user choice.
   }, []);
 
   useEffect(() => {
@@ -218,6 +278,12 @@ export function RamadanProvider({ children }) {
   const setNotes = (day, notes) => dispatch({ type: 'SET_NOTES', payload: { day, notes } });
   const updateQuranTracker = (tracker) => dispatch({ type: 'UPDATE_QURAN_TRACKER', payload: tracker });
   const addQuranLog = (log) => dispatch({ type: 'ADD_QURAN_LOG', payload: { log } });
+
+  const updateChecklistConfig = (config) => dispatch({ type: 'UPDATE_CHECKLIST_CONFIG', payload: { config } });
+  const addChecklistItem = (activityId) => dispatch({ type: 'ADD_CHECKLIST_ITEM', payload: { activityId } });
+  const removeChecklistItem = (activityId) => dispatch({ type: 'REMOVE_CHECKLIST_ITEM', payload: { activityId } });
+  const moveChecklistItem = (index, direction) => dispatch({ type: 'MOVE_CHECKLIST_ITEM', payload: { index, direction } });
+
   const resetDay = (day) => dispatch({ type: 'RESET_DAY', payload: { day } });
   const resetAll = () => dispatch({ type: 'RESET_ALL' });
 
@@ -324,6 +390,10 @@ export function RamadanProvider({ children }) {
       setNotes,
       updateQuranTracker,
       addQuranLog,
+      updateChecklistConfig,
+      addChecklistItem,
+      removeChecklistItem,
+      moveChecklistItem,
       resetDay,
       resetAll,
       getDayData,
@@ -341,6 +411,7 @@ export function RamadanProvider({ children }) {
       getAllActivities,
       quranTracker: state.quranTracker,
       quranLogs: state.quranLogs || [],
+      checklistConfig: state.checklistConfig || DEFAULT_CHECKLIST,
       CATEGORIES,
       INPUT_TYPES
     }}>

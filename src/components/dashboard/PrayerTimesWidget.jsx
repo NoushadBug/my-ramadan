@@ -10,6 +10,12 @@ const toEnglish = (str) => {
   return str.replace(/[০-৯]/g, (d) => bengaliDigits.indexOf(d));
 };
 
+const toBengali = (num) => {
+  if (!num && num !== 0) return '';
+  const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return num.toString().split('').map(d => bengaliDigits[parseInt(d)] || d).join('');
+};
+
 const parseTime = (timeStr) => {
   if (!timeStr) return null;
   const englishTime = toEnglish(timeStr);
@@ -19,23 +25,68 @@ const parseTime = (timeStr) => {
   return date;
 };
 
+// Map English months to Bengali
+const bengaliMonths = [
+  'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+  'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'
+];
+
+const getFormattedDate = () => {
+  const date = new Date();
+  const day = toBengali(date.getDate());
+  const month = bengaliMonths[date.getMonth()];
+  const year = toBengali(date.getFullYear());
+  return `${day} ${month}, ${year}`;
+};
+
 export default function PrayerTimesWidget() {
-  const { todaySchedule, state } = useRamadan();
+  const { todaySchedule, state, schedule } = useRamadan();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   const [timeLeft, setTimeLeft] = useState('');
   const [nextEvent, setNextEvent] = useState('');
+  const [currentDateDisplay, setCurrentDateDisplay] = useState('');
+  const [activeSchedule, setActiveSchedule] = useState(null);
 
   useEffect(() => {
-    if (!todaySchedule) return;
+    // Set formatted current date
+    setCurrentDateDisplay(getFormattedDate());
+
+    // Find schedule for TODAY (System Date)
+    // The JSON has "date": "১৯ ফেব্রুয়ারি"
+    // We need to match today's date (e.g. "19 February") to the JSON "date" field
+    // But since JSON is in Bengali, we might need a mapping or check index if strict.
+
+    // Logic:
+    // 1. Get today's day and month.
+    // 2. Format it like "DD Month" in Bengali if possible, OR
+    // 3. Since `todaySchedule` from context relies on `currentDay` (which is calculated from start date),
+    //    we can check if `state.currentDay` is valid (1-30).
+    //    If `state.currentDay` is valid, it means we are IN Ramadan (or simulated range).
+    //    So we use `todaySchedule`.
+
+    if (todaySchedule) {
+      setActiveSchedule(todaySchedule);
+    } else {
+      // Fallback: If context didn't match (e.g. out of range), we just show empty or "No Schedule"
+      // Or we could show the first day as preview?
+      setActiveSchedule(null);
+    }
+
+  }, [todaySchedule, state.currentDay]);
+
+  useEffect(() => {
+    if (!activeSchedule) return;
 
     const timer = setInterval(() => {
       const now = new Date();
 
       // Parse times (Assuming Sehri is AM and Iftar is PM)
-      let sehriTime = parseTime(todaySchedule.sehri_end);
-      let iftarTime = parseTime(todaySchedule.iftar);
+      let sehriTime = parseTime(activeSchedule.sehri_end);
+      let iftarTime = parseTime(activeSchedule.iftar);
+
+      if (!sehriTime || !iftarTime) return;
 
       // Adjust Iftar to PM (add 12 hours if it's afternoon/evening)
       // Standard practice: iftar is usually 5-7 PM.
@@ -54,7 +105,6 @@ export default function PrayerTimesWidget() {
         eventName = 'ইফতারের সময়';
       } else {
         // Next day Sehri
-        // For simplicity, just show "Completed" or wait for next day load
         targetTime = null;
         eventName = 'আগামীকাল';
       }
@@ -74,12 +124,18 @@ export default function PrayerTimesWidget() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [todaySchedule]);
+  }, [activeSchedule]);
 
-  if (!todaySchedule) {
+  if (!activeSchedule) {
     return (
       <div className={`rounded-2xl p-6 border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-emerald-100'}`}>
-        <p className="opacity-50">লোডিং...</p>
+        <h3 className={`text-lg font-bold mb-1 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+          আজকের সময়সূচি
+        </h3>
+        <p className={`text-sm mb-4 ${isDark ? 'text-white/70' : 'text-emerald-600'}`}>
+          {currentDateDisplay}
+        </p>
+        <p className="opacity-50 text-sm">রমজানের সময়সূচি পাওয়া যায়নি (সম্ভবত আজ রমজান নয়)</p>
       </div>
     );
   }
@@ -94,7 +150,7 @@ export default function PrayerTimesWidget() {
             আজকের সময়সূচি
           </h3>
           <p className={`text-sm ${isDark ? 'text-white/70' : 'text-emerald-600'}`}>
-            {todaySchedule.date} | রমজান {toEnglish(state.currentDay.toString())}
+            {currentDateDisplay} | রমজান {toBengali(state.currentDay)}
           </p>
         </div>
         <div className={`px-3 py-1 rounded-full text-xs font-bold ${
@@ -112,7 +168,7 @@ export default function PrayerTimesWidget() {
             সেহরির শেষ সময়
           </div>
           <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-800'}`}>
-            {todaySchedule.sehri_end}
+            {activeSchedule.sehri_end}
           </div>
         </div>
 
@@ -123,7 +179,7 @@ export default function PrayerTimesWidget() {
             ইফতারের সময়
           </div>
           <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-800'}`}>
-            {todaySchedule.iftar}
+            {activeSchedule.iftar}
           </div>
         </div>
       </div>
