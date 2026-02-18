@@ -20,7 +20,7 @@ const parseTime = (timeStr) => {
 };
 
 export default function PrayerTimesWidget() {
-  const { todaySchedule, state } = useRamadan();
+  const { todaySchedule, state, isActualRamadanDay } = useRamadan();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -91,10 +91,10 @@ export default function PrayerTimesWidget() {
       <div className="flex justify-between items-start relative z-10">
         <div>
           <h3 className={`text-lg font-bold mb-1 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-            আজকের সময়সূচি
+            {isActualRamadanDay ? 'আজকের সময়সূচি' : todaySchedule.date}
           </h3>
           <p className={`text-sm ${isDark ? 'text-white/70' : 'text-emerald-600'}`}>
-            {todaySchedule.date} | রমজান {toEnglish(state.currentDay.toString())}
+            {isActualRamadanDay && `${todaySchedule.date} | `}রমজান {toEnglish(todaySchedule.day.toString())}
           </p>
         </div>
         <div className={`px-3 py-1 rounded-full text-xs font-bold ${

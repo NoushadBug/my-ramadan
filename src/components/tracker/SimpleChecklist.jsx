@@ -2,18 +2,7 @@ import { motion } from 'framer-motion';
 import { useRamadan } from '../../context/RamadanContext';
 import { useTheme } from '../../context/ThemeContext';
 import Icon from '../Icon';
-
-const CHECKLIST_ITEMS = [
-  { id: 'fajr_jamat', label: 'ফজর', icon: 'mosque', color: 'text-cyan-500' },
-  { id: 'dhuhr_jamat', label: 'যোহর', icon: 'sun', color: 'text-amber-500' },
-  { id: 'asr_jamat', label: 'আছর', icon: 'cloudSun', color: 'text-orange-500' },
-  { id: 'maghrib_jamat', label: 'মাগরিব', icon: 'sunset', color: 'text-indigo-500' },
-  { id: 'isha_jamat', label: 'এশা', icon: 'moon', color: 'text-blue-600' },
-  { id: 'tarawih', label: 'তারাবিহ', icon: 'prayingHands', color: 'text-purple-500' },
-  { id: 'quran_daily', label: 'কুরআন', icon: 'bookQuran', color: 'text-emerald-500' },
-  { id: 'morning_dhikr', label: 'সকাল জিকির', icon: 'sun', color: 'text-yellow-500' },
-  { id: 'evening_dhikr', label: 'সন্ধ্যা জিকির', icon: 'moon', color: 'text-indigo-400' },
-];
+import { SORTED_ACTIVITIES_LIST } from '../../data/activities';
 
 export default function SimpleChecklist() {
   const { state, setActivityValue, getActivityValue } = useRamadan();
@@ -28,9 +17,10 @@ export default function SimpleChecklist() {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-3">
-      {CHECKLIST_ITEMS.map((item) => {
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+      {SORTED_ACTIVITIES_LIST.map((item) => {
         const isCompleted = getActivityValue(currentDay, item.id);
+        const iconColor = item.category?.color || '#10B981';
 
         return (
           <motion.button
@@ -38,7 +28,7 @@ export default function SimpleChecklist() {
             whileTap={{ scale: 0.95 }}
             onClick={() => handleToggle(item.id)}
             className={`
-              relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200
+              relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200 min-h-[110px]
               ${isCompleted
                 ? isDark
                   ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
@@ -49,10 +39,12 @@ export default function SimpleChecklist() {
               }
             `}
           >
-            <div className={`text-2xl mb-2 ${isCompleted ? 'text-inherit' : item.color}`}>
+            <div className="text-2xl mb-2" style={{ color: isCompleted ? 'inherit' : iconColor }}>
               <Icon name={item.icon} />
             </div>
-            <span className="text-sm font-bold">{item.label}</span>
+            <span className="text-xs sm:text-sm font-bold text-center leading-tight line-clamp-2" title={item.name}>
+              {item.name}
+            </span>
 
             {isCompleted && (
               <motion.div
