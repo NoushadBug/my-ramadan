@@ -125,10 +125,10 @@ export default function DayTracker() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full h-full p-4 sm:p-6 md:p-8 overflow-hidden flex flex-col"
+              className="w-full h-full overflow-hidden flex flex-col"
               onClick={e => e.stopPropagation()}
             >
-                <div className={`relative w-full h-full rounded-2xl p-6 flex flex-col shadow-2xl overflow-hidden ${isDark ? 'bg-emerald-900 border border-white/10' : 'bg-white'}`}>
+                <div className={`relative w-full h-full p-6 flex flex-col shadow-2xl overflow-hidden ${isDark ? 'bg-emerald-900' : 'bg-white'}`}>
                     <div className="flex items-center justify-between mb-6 shrink-0">
                         <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>পুরো মাসের আমল</h2>
                         <button
