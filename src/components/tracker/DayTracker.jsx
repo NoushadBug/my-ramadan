@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRamadan } from '../../context/RamadanContext';
 import { useTheme } from '../../context/ThemeContext';
+import useMediaQuery from '../../hooks/useMediaQuery';
 import Icon from '../Icon';
 import MonthView from './MonthView';
+import MobileMonthView from './MobileMonthView';
 import SimpleChecklist from './SimpleChecklist';
 import PrayerTimesWidget from '../dashboard/PrayerTimesWidget';
 import Calendar from '../planner/Calendar';
@@ -17,12 +19,22 @@ export default function DayTracker() {
   const { state, setCurrentDay, isLast10Days } = useRamadan();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const [viewMode, setViewMode] = useState('today'); // 'today' | 'month'
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showMonthModal, setShowMonthModal] = useState(false);
 
   const currentDay = state.currentDay;
   const isLast10 = isLast10Days(currentDay);
+
+  const handleMonthViewClick = () => {
+    if (isDesktop) {
+      setShowMonthModal(true);
+    } else {
+      setViewMode('month');
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -99,6 +111,42 @@ export default function DayTracker() {
         )}
       </AnimatePresence>
 
+      {/* Month View Modal (Desktop) */}
+      <AnimatePresence>
+        {showMonthModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowMonthModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full h-full p-4 sm:p-6 md:p-8 overflow-hidden flex flex-col"
+              onClick={e => e.stopPropagation()}
+            >
+                <div className={`relative w-full h-full rounded-2xl p-6 flex flex-col shadow-2xl overflow-hidden ${isDark ? 'bg-emerald-900 border border-white/10' : 'bg-white'}`}>
+                    <div className="flex items-center justify-between mb-6 shrink-0">
+                        <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>পুরো মাসের আমল</h2>
+                        <button
+                            onClick={() => setShowMonthModal(false)}
+                            className="w-10 h-10 rounded-full bg-black/5 text-black/50 dark:text-white dark:bg-white/10 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/20 transition-colors"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto -mx-6 px-6">
+                        <MonthView defaultTab="all" />
+                    </div>
+                </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* View Mode Toggle */}
       <div className={`p-1 rounded-xl flex gap-1 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-emerald-50 border-emerald-100'}`}>
         <button
@@ -113,9 +161,9 @@ export default function DayTracker() {
           আজকের আমল
         </button>
         <button
-          onClick={() => setViewMode('month')}
+          onClick={handleMonthViewClick}
           className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-            viewMode === 'month'
+            viewMode === 'month' || (showMonthModal && isDesktop)
               ? isDark ? 'bg-emerald-500 text-white' : 'bg-white text-emerald-700 shadow-sm'
               : isDark ? 'text-white/50 hover:text-white' : 'text-emerald-600/50 hover:text-emerald-700'
           }`}
@@ -149,7 +197,7 @@ export default function DayTracker() {
           >
             <div className={`rounded-2xl p-4 border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-emerald-100'}`}>
                 <h3 className={`font-bold mb-4 ${isDark ? 'text-white' : 'text-emerald-900'}`}>পুরো মাসের আমল</h3>
-                <MonthView />
+                <MobileMonthView />
             </div>
           </motion.div>
         )}

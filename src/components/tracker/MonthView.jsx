@@ -9,7 +9,7 @@ const toBengali = (num) => {
   return num.toString().split('').map(d => bengaliDigits[parseInt(d)] || d).join('');
 };
 
-export default function MonthView() {
+export default function MonthView({ defaultTab }) {
   const { state, setActivityValue } = useRamadan();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -18,6 +18,7 @@ export default function MonthView() {
 
   // Initial state based on currentDay
   const getInitialTab = () => {
+    if (defaultTab) return defaultTab;
     if (currentDay <= 10) return 'first';
     if (currentDay <= 20) return 'second';
     return 'third';
