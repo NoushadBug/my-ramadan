@@ -80,7 +80,9 @@ export default function PrayerTimesWidget() {
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        setTimeLeft(`${toBengali(hours)}ঘ ${toBengali(minutes)}মি ${toBengali(seconds)}সে`);
+
+        const pad = (n) => n.toString().padStart(2, '0');
+        setTimeLeft(`${toBengali(pad(hours))}:${toBengali(pad(minutes))}:${toBengali(pad(seconds))}`);
         setNextEvent(eventName);
       } else {
         setTimeLeft('শেষ');
@@ -106,7 +108,7 @@ export default function PrayerTimesWidget() {
     }`}>
       <div className="flex justify-between items-start relative z-10">
         <div>
-          <h3 className={`text-lg font-bold mb-1 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+          <h3 className={`text-base sm:text-lg font-bold mb-1 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
             {isToday ? 'আজকের সময়সূচি' : selectedDaySchedule.date}
           </h3>
           <p className={`text-sm ${isDark ? 'text-white/70' : 'text-emerald-600'}`}>
@@ -127,7 +129,7 @@ export default function PrayerTimesWidget() {
           <div className={`text-xs font-medium mb-1 ${isDark ? 'text-white/50' : 'text-emerald-500'}`}>
             সেহরির শেষ সময়
           </div>
-          <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-800'}`}>
+          <div className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-800'}`}>
             {selectedDaySchedule.sehri_end}
           </div>
         </div>
@@ -138,7 +140,7 @@ export default function PrayerTimesWidget() {
           <div className={`text-xs font-medium mb-1 ${isDark ? 'text-white/50' : 'text-emerald-500'}`}>
             ইফতারের সময়
           </div>
-          <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-800'}`}>
+          <div className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-800'}`}>
             {selectedDaySchedule.iftar}
           </div>
         </div>
@@ -155,7 +157,7 @@ export default function PrayerTimesWidget() {
           <div className={`text-xs font-medium mb-1 ${isDark ? 'text-amber-400' : 'text-amber-700'}`}>
             {nextEvent} বাকি
           </div>
-          <div className={`text-3xl font-bold tabular-nums ${isDark ? 'text-amber-300' : 'text-amber-600'}`}>
+          <div className={`text-2xl sm:text-3xl font-bold tabular-nums ${isDark ? 'text-amber-300' : 'text-amber-600'}`}>
             {timeLeft}
           </div>
         </motion.div>
