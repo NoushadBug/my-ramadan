@@ -4,6 +4,11 @@ import { useTheme } from '../../context/ThemeContext';
 import Icon from '../Icon';
 import GoalInput from './GoalInput';
 
+const toBengali = (num) => {
+  const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return num.toString().split('').map(d => bengaliDigits[parseInt(d)] || d).join('');
+};
+
 export default function Calendar() {
   const { state, setCurrentDay, getDailyProgress } = useRamadan();
   const { theme } = useTheme();
@@ -67,7 +72,7 @@ export default function Calendar() {
                   }
                 `}
               >
-                <span>{day}</span>
+                <span>{toBengali(day)}</span>
                 {status === 'complete' && <Icon name="check" className="text-xs" />}
                 {status === 'partial' && <span className="text-xs">.</span>}
               </motion.button>

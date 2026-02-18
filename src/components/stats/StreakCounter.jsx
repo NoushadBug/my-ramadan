@@ -1,9 +1,17 @@
 import { motion } from 'framer-motion';
 import { useRamadan } from '../../context/RamadanContext';
+import { useTheme } from '../../context/ThemeContext';
 import Icon from '../Icon';
+
+const toBengali = (num) => {
+  const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return num.toString().split('').map(d => bengaliDigits[parseInt(d)] || d).join('');
+};
 
 export default function StreakCounter() {
   const { state, getTotalCompleted, getTotalActs, getProgress, getActs, getDailyProgress } = useRamadan();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   
   const totalCompleted = getTotalCompleted();
   const totalActs = getTotalActs();
@@ -21,7 +29,9 @@ export default function StreakCounter() {
       animate={{ opacity: 1, scale: 1 }}
       className="space-y-6"
     >
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 text-center">
+      <div className={`backdrop-blur-sm rounded-2xl p-8 border text-center ${
+        isDark ? 'bg-white/10 border-white/10' : 'bg-white/80 border-emerald-100 shadow-lg'
+      }`}>
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -33,7 +43,7 @@ export default function StreakCounter() {
               cx="70"
               cy="70"
               r="60"
-              stroke="rgba(255,255,255,0.1)"
+              stroke={isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}
               strokeWidth="12"
               fill="none"
             />
@@ -62,17 +72,17 @@ export default function StreakCounter() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
-              className="text-4xl font-bold text-white"
+              className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}
             >
-              {progress}%
+              {toBengali(progress)}%
             </motion.span>
-            <span className="text-white/60 text-sm">মোট</span>
+            <span className={`text-sm ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>মোট</span>
           </div>
         </motion.div>
         
-        <h2 className="text-2xl font-bold text-white mb-2">আপনার অগ্রগতি</h2>
-        <p className="text-white/60">
-          {totalCompleted} / {totalActs} ইবাদত সম্পন্ন
+        <h2 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-emerald-900'}`}>আপনার অগ্রগতি</h2>
+        <p className={isDark ? 'text-white/60' : 'text-emerald-600'}>
+          {toBengali(totalCompleted)} / {toBengali(totalActs)} ইবাদত সম্পন্ন
         </p>
       </div>
 
@@ -81,12 +91,14 @@ export default function StreakCounter() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-amber-500/20 backdrop-blur-sm rounded-2xl p-6 border border-amber-400/30 text-center"
+          className={`backdrop-blur-sm rounded-2xl p-6 border text-center ${
+            isDark ? 'bg-amber-500/20 border-amber-400/30' : 'bg-amber-50 border-amber-200'
+          }`}
         >
-          <Icon name="fire" className="text-3xl text-amber-400 mb-2 mx-auto" />
-          <p className="text-white/60 text-sm">বর্তমান স্ট্রিক</p>
-          <p className="text-2xl font-bold text-white">
-            {state.streak} দিন
+          <Icon name="fire" className={`text-3xl mb-2 mx-auto ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />
+          <p className={`text-sm ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>বর্তমান স্ট্রিক</p>
+          <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>
+            {toBengali(state.streak)} দিন
           </p>
         </motion.div>
 
@@ -94,12 +106,14 @@ export default function StreakCounter() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-emerald-500/20 backdrop-blur-sm rounded-2xl p-6 border border-emerald-400/30 text-center"
+          className={`backdrop-blur-sm rounded-2xl p-6 border text-center ${
+            isDark ? 'bg-emerald-500/20 border-emerald-400/30' : 'bg-emerald-50 border-emerald-200'
+          }`}
         >
-          <Icon name="calendar" className="text-3xl text-emerald-400 mb-2 mx-auto" />
-          <p className="text-white/60 text-sm">সক্রিয় দিন</p>
-          <p className="text-2xl font-bold text-white">
-            {daysWithProgress} / ৩০
+          <Icon name="calendar" className={`text-3xl mb-2 mx-auto ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
+          <p className={`text-sm ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>সক্রিয় দিন</p>
+          <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>
+            {toBengali(daysWithProgress)} / ৩০
           </p>
         </motion.div>
       </div>
@@ -108,9 +122,11 @@ export default function StreakCounter() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
+        className={`backdrop-blur-sm rounded-2xl p-6 border ${
+          isDark ? 'bg-white/10 border-white/10' : 'bg-white/80 border-emerald-100 shadow-lg'
+        }`}
       >
-        <h3 className="text-lg font-bold text-white mb-4">দৈনিক অগ্রগতি</h3>
+        <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-emerald-900'}`}>দৈনিক অগ্রগতি</h3>
         <div className="flex gap-1 h-24 items-end">
           {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => {
             const dailyProgress = getDailyProgress(day);
@@ -129,15 +145,15 @@ export default function StreakCounter() {
                     ? 'bg-emerald-400' 
                     : completed > 0 
                       ? 'bg-amber-400' 
-                      : 'bg-white/20'
+                      : isDark ? 'bg-white/20' : 'bg-emerald-200'
                   }
                 `}
-                title={`দিন ${day}: ${completed}/${acts.length}`}
+                title={`দিন ${toBengali(day)}: ${toBengali(completed)}/${toBengali(acts.length)}`}
               />
             );
           })}
         </div>
-        <div className="flex justify-between mt-2 text-xs text-white/40">
+        <div className={`flex justify-between mt-2 text-xs ${isDark ? 'text-white/40' : 'text-emerald-400'}`}>
           <span>দিন ১</span>
           <span>দিন ৩০</span>
         </div>

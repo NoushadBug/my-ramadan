@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRamadan } from '../../context/RamadanContext';
+import { useTheme } from '../../context/ThemeContext';
 import Icon from '../Icon';
 
 const AVAILABLE_ICONS = [
-  'sunrise', 'utensils', 'bookQuran', 'mosque', 'moon', 
+  'cloudSun', 'utensils', 'bookQuran', 'mosque', 'moon', 
   'handsPraying', 'handHoldingHeart', 'sunset', 'target', 'trophy'
 ];
 
 export default function Settings() {
-  const { state, addAct, removeAct, updateAct, resetAll, getActs, getBengaliNumber } = useRamadan();
+  const { addAct, removeAct, updateAct, resetAll, getActs } = useRamadan();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const acts = getActs();
   
   const [newActName, setNewActName] = useState('');
@@ -60,12 +63,14 @@ export default function Settings() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+      <div className={`backdrop-blur-sm rounded-2xl p-6 border ${
+        isDark ? 'bg-white/10 border-white/10' : 'bg-white/80 border-emerald-100 shadow-lg'
+      }`}>
+        <h2 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-emerald-900'}`}>
           <Icon name="cog" className="text-amber-400" />
           ইবাদত সেটিংস
         </h2>
-        <p className="text-white/60 text-sm mb-6">
+        <p className={`text-sm mb-6 ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>
           আপনার নিজস্ব ইবাদত তালিকা তৈরি করুন। আপনি যোগ করতে পারবেন, সম্পাদনা করতে পারবেন এবং অপ্রয়োজনীয় মুছে ফেলতে পারবেন।
         </p>
 
@@ -77,7 +82,7 @@ export default function Settings() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="bg-white/5 rounded-xl p-4 border border-white/10"
+                className={`rounded-xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-emerald-50 border-emerald-100'}`}
               >
                 {editingAct === act.id ? (
                   <div className="space-y-3">
@@ -85,7 +90,9 @@ export default function Settings() {
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/40 focus:outline-none focus:border-amber-400/50"
+                      className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:border-amber-400 ${
+                        isDark ? 'bg-white/10 border border-white/20 text-white placeholder-white/40' : 'bg-white border border-emerald-200 text-emerald-900 placeholder-emerald-400'
+                      }`}
                       placeholder="ইবাদতের নাম"
                     />
                     <div className="flex gap-2 flex-wrap">
@@ -96,7 +103,7 @@ export default function Settings() {
                           className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
                             editIcon === icon 
                               ? 'bg-amber-400 text-emerald-900' 
-                              : 'bg-white/10 text-white hover:bg-white/20'
+                              : isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                           }`}
                         >
                           <Icon name={icon} className="text-sm" />
@@ -112,7 +119,9 @@ export default function Settings() {
                       </button>
                       <button
                         onClick={() => setEditingAct(null)}
-                        className="px-4 py-2 bg-white/10 text-white rounded-lg text-sm hover:bg-white/20 transition-colors"
+                        className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                          isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                        }`}
                       >
                         বাতিল
                       </button>
@@ -121,15 +130,19 @@ export default function Settings() {
                 ) : (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                        <Icon name={act.icon} className="text-white" />
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        isDark ? 'bg-white/10' : 'bg-emerald-100'
+                      }`}>
+                        <Icon name={act.icon} className={isDark ? 'text-white' : 'text-emerald-700'} />
                       </div>
-                      <span className="text-white font-medium">{act.name}</span>
+                      <span className={`font-medium ${isDark ? 'text-white' : 'text-emerald-900'}`}>{act.name}</span>
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleStartEdit(act)}
-                        className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                          isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                        }`}
                       >
                         <Icon name="edit" className="text-xs" />
                       </button>
@@ -147,15 +160,17 @@ export default function Settings() {
           </AnimatePresence>
         </div>
 
-        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <h3 className="text-white font-medium mb-3">নতুন ইবাদত যোগ করুন</h3>
+        <div className={`rounded-xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-emerald-50 border-emerald-100'}`}>
+          <h3 className={`font-medium mb-3 ${isDark ? 'text-white' : 'text-emerald-900'}`}>নতুন ইবাদত যোগ করুন</h3>
           <div className="space-y-3">
             <input
               type="text"
               value={newActName}
               onChange={(e) => setNewActName(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddAct()}
-              className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/40 focus:outline-none focus:border-amber-400/50"
+              className={`w-full rounded-lg px-3 py-2 focus:outline-none focus:border-amber-400 ${
+                isDark ? 'bg-white/10 border border-white/20 text-white placeholder-white/40' : 'bg-white border border-emerald-200 text-emerald-900 placeholder-emerald-400'
+              }`}
               placeholder="ইবাদতের নাম লিখুন..."
             />
             <div className="flex gap-2 flex-wrap">
@@ -166,7 +181,7 @@ export default function Settings() {
                   className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
                     newActIcon === icon 
                       ? 'bg-amber-400 text-emerald-900' 
-                      : 'bg-white/10 text-white hover:bg-white/20'
+                      : isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                   }`}
                 >
                   <Icon name={icon} className="text-sm" />
@@ -185,8 +200,10 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+      <div className={`backdrop-blur-sm rounded-2xl p-6 border ${
+        isDark ? 'bg-white/10 border-white/10' : 'bg-white/80 border-emerald-100 shadow-lg'
+      }`}>
+        <h2 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-emerald-900'}`}>
           <Icon name="user" className="text-amber-400" />
           অ্যাকাউন্ট সেটিংস
         </h2>

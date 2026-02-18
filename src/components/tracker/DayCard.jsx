@@ -5,9 +5,15 @@ import Icon from '../Icon';
 import ActItem from './ActItem';
 import ProgressRing from './ProgressRing';
 
+const toBengali = (num) => {
+  const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return num.toString().split('').map(d => bengaliDigits[parseInt(d)] || d).join('');
+};
+
 export default function DayCard() {
   const { state, getDayData, getCompletedActs, setCurrentDay, getActs } = useRamadan();
   const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const currentDay = state.currentDay;
   const dayData = getDayData(currentDay);
   const completedCount = getCompletedActs(currentDay);
@@ -24,8 +30,6 @@ export default function DayCard() {
       }
     }
   };
-
-  const isDark = theme === 'dark';
 
   return (
     <motion.div
@@ -60,7 +64,7 @@ export default function DayCard() {
             </button>
             <div>
               <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>
-                রমজানের {currentDay}তম দিন
+                রমজানের {toBengali(currentDay)}তম দিন
               </h2>
               <p className={`text-sm ${isDark ? 'text-emerald-200' : 'text-emerald-600'}`}>
                 {dayData?.date}
@@ -87,7 +91,7 @@ export default function DayCard() {
           <div className="flex-1">
             <p className={`text-sm mb-1 ${isDark ? 'text-white/70' : 'text-emerald-700'}`}>আজকের অগ্রগতি</p>
             <p className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-emerald-900'}`}>
-              {completedCount} / {acts.length} ইবাদত সম্পন্ন
+              {toBengali(completedCount)} / {toBengali(acts.length)} ইবাদত সম্পন্ন
             </p>
             <div className={`mt-2 h-2 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-emerald-200'}`}>
               <motion.div
