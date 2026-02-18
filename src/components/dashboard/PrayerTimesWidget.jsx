@@ -4,6 +4,11 @@ import { useRamadan } from '../../context/RamadanContext';
 import { useTheme } from '../../context/ThemeContext';
 import Icon from '../Icon';
 
+const toBengali = (num) => {
+  const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return num.toString().split('').map(d => bengaliDigits[parseInt(d)] || d).join('');
+};
+
 const toEnglish = (str) => {
   if (!str) return '';
   const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
@@ -75,7 +80,7 @@ export default function PrayerTimesWidget() {
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        setTimeLeft(`${hours}ঘ ${minutes}মি ${seconds}সে`);
+        setTimeLeft(`${toBengali(hours)}ঘ ${toBengali(minutes)}মি ${toBengali(seconds)}সে`);
         setNextEvent(eventName);
       } else {
         setTimeLeft('শেষ');
