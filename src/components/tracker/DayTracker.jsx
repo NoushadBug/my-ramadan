@@ -66,6 +66,8 @@ export default function DayTracker() {
         </div>
       </div>
 
+      <PrayerTimesWidget />
+
       {/* Calendar Modal */}
       <AnimatePresence>
         {showCalendar && (
@@ -132,8 +134,6 @@ export default function DayTracker() {
             exit={{ opacity: 0, y: -10 }}
             className="space-y-4"
           >
-            <PrayerTimesWidget />
-
             <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-emerald-100'}`}>
               <h3 className={`font-bold mb-4 ${isDark ? 'text-white' : 'text-emerald-900'}`}>দৈনিক আমল</h3>
               <SimpleChecklist />
