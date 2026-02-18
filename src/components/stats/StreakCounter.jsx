@@ -43,7 +43,7 @@ export default function StreakCounter() {
               cx="80"
               cy="80"
               r="70"
-              stroke={isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}
+              stroke={isDark ? "rgba(255,255,255,0.1)" : "rgba(52, 211, 153, 0.2)"}
               strokeWidth="14"
               fill="none"
             />
