@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import Icon from '../Icon';
 import { useTheme } from '../../context/ThemeContext';
 
-export default function Header({ onSettingsClick }) {
+export default function Header() {
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -43,19 +43,6 @@ export default function Header({ onSettingsClick }) {
           >
             <Icon name={theme === 'dark' ? 'sun' : 'moon'} className="text-sm" />
           </button>
-          
-          {onSettingsClick && (
-            <button
-              onClick={onSettingsClick}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                theme === 'dark' 
-                  ? 'bg-white/10 hover:bg-white/20 text-white' 
-                  : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700'
-              }`}
-            >
-              <Icon name="cog" className="text-sm" />
-            </button>
-          )}
         </div>
       </div>
     </motion.header>

@@ -36,9 +36,9 @@ export default function Calendar() {
       }`}>
         <h2 className={`text-xl font-bold mb-4 text-center ${isDark ? 'text-white' : 'text-emerald-900'}`}>রমজান ক্যালেন্ডার</h2>
         
-        <div className="grid grid-cols-6 sm:grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহস্পতি', 'শুক্র', 'শনি'].map((day) => (
-            <div key={day} className={`text-center text-xs py-2 ${isDark ? 'text-white/50' : 'text-emerald-600'}`}>
+            <div key={day} className={`text-center text-sm py-3 font-medium ${isDark ? 'text-white/50' : 'text-emerald-600'}`}>
               {day}
             </div>
           ))}
@@ -54,8 +54,8 @@ export default function Calendar() {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className={`
-                  aspect-square rounded-xl font-medium text-sm flex flex-col items-center justify-center gap-1
-                  transition-all duration-200 border
+                  min-h-[3.5rem] rounded-xl font-medium text-lg flex flex-col items-center justify-center gap-0.5
+                  transition-all duration-200 border p-2
                   ${isActive 
                     ? 'bg-amber-400 text-emerald-900 border-amber-400 shadow-lg shadow-amber-400/30' 
                     : status === 'complete'
@@ -80,18 +80,18 @@ export default function Calendar() {
           })}
         </div>
 
-        <div className="flex justify-center gap-6 mt-6">
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${isDark ? 'bg-emerald-500/50' : 'bg-emerald-400'}`}></div>
-            <span className={`text-xs ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>সম্পূর্ণ</span>
+        <div className="flex justify-center gap-8 mt-6">
+          <div className="flex items-center gap-3">
+            <div className={`w-4 h-4 rounded-full ${isDark ? 'bg-emerald-500/50' : 'bg-emerald-400'}`}></div>
+            <span className={`text-sm ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>সম্পূর্ণ</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${isDark ? 'bg-amber-500/30' : 'bg-amber-300'}`}></div>
-            <span className={`text-xs ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>আংশিক</span>
+          <div className="flex items-center gap-3">
+            <div className={`w-4 h-4 rounded-full ${isDark ? 'bg-amber-500/30' : 'bg-amber-300'}`}></div>
+            <span className={`text-sm ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>আংশিক</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${isDark ? 'bg-white/10' : 'bg-emerald-200'}`}></div>
-            <span className={`text-xs ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>খালি</span>
+          <div className="flex items-center gap-3">
+            <div className={`w-4 h-4 rounded-full ${isDark ? 'bg-white/10' : 'bg-emerald-200'}`}></div>
+            <span className={`text-sm ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>খালি</span>
           </div>
         </div>
       </div>

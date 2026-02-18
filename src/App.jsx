@@ -6,6 +6,7 @@ import DayTracker from './components/tracker/DayTracker';
 import Calendar from './components/planner/Calendar';
 import StreakCounter from './components/stats/StreakCounter';
 import Dashboard from './components/dashboard/Dashboard';
+import Settings from './components/settings/Settings';
 import './components/Icons';
 
 function ThemeInitializer({ children }) {
@@ -33,6 +34,7 @@ function App() {
             {activeTab === 'planner' && <Calendar />}
             {activeTab === 'stats' && <StreakCounter />}
             {activeTab === 'dashboard' && <Dashboard />}
+            {activeTab === 'settings' && <Settings />}
           </Layout>
         </RamadanProvider>
       </ThemeProvider>

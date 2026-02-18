@@ -11,13 +11,13 @@ const toBengali = (num) => {
 };
 
 export default function DayCard() {
-  const { state, getDayData, getCompletedActs, setCurrentDay, getActs } = useRamadan();
+  const { state, getDayData, getCompletedActivitiesCount, setCurrentDay, getAllActivities } = useRamadan();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const currentDay = state.currentDay;
   const dayData = getDayData(currentDay);
-  const completedCount = getCompletedActs(currentDay);
-  const acts = getActs();
+  const completedCount = getCompletedActivitiesCount(currentDay);
+  const acts = getAllActivities();
   const progress = acts.length > 0 ? Math.round((completedCount / acts.length) * 100) : 0;
 
   const containerVariants = {

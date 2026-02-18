@@ -9,14 +9,14 @@ const toBengali = (num) => {
 };
 
 export default function StreakCounter() {
-  const { state, getTotalCompleted, getTotalActs, getProgress, getActs, getDailyProgress } = useRamadan();
+  const { state, getCompletedActivitiesCount, getTotalActivities, getProgress, getAllActivities, getDailyProgress } = useRamadan();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
-  const totalCompleted = getTotalCompleted();
-  const totalActs = getTotalActs();
+  const totalCompleted = getCompletedActivitiesCount(state.currentDay);
+  const totalActs = getTotalActivities();
   const progress = getProgress();
-  const acts = getActs();
+  const acts = getAllActivities();
   
   const daysWithProgress = Object.keys(state.days).filter(day => {
     const actsData = state.days[day]?.acts;
@@ -36,28 +36,28 @@ export default function StreakCounter() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
-          className="relative w-40 h-40 mx-auto mb-6"
+          className="relative w-48 h-48 mx-auto mb-6"
         >
           <svg className="w-full h-full transform -rotate-90">
             <circle
-              cx="70"
-              cy="70"
-              r="60"
+              cx="80"
+              cy="80"
+              r="70"
               stroke={isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}
-              strokeWidth="12"
+              strokeWidth="14"
               fill="none"
             />
             <motion.circle
-              cx="70"
-              cy="70"
-              r="60"
+              cx="80"
+              cy="80"
+              r="70"
               stroke="url(#statsGradient)"
-              strokeWidth="12"
+              strokeWidth="14"
               fill="none"
               strokeLinecap="round"
-              strokeDasharray={377}
-              initial={{ strokeDashoffset: 377 }}
-              animate={{ strokeDashoffset: 377 - (progress / 100) * 377 }}
+              strokeDasharray={440}
+              initial={{ strokeDashoffset: 440 }}
+              animate={{ strokeDashoffset: 440 - (progress / 100) * 440 }}
               transition={{ duration: 1.5, ease: 'easeOut', delay: 0.3 }}
             />
             <defs>
@@ -72,21 +72,21 @@ export default function StreakCounter() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
-              className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}
+              className={`text-5xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}
             >
               {toBengali(progress)}%
             </motion.span>
-            <span className={`text-sm ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>মোট</span>
+            <span className={`text-base ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>মোট</span>
           </div>
         </motion.div>
         
-        <h2 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-emerald-900'}`}>আপনার অগ্রগতি</h2>
-        <p className={isDark ? 'text-white/60' : 'text-emerald-600'}>
+        <h2 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-emerald-900'}`}>আপনার অগ্রগতি</h2>
+        <p className={`text-lg ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>
           {toBengali(totalCompleted)} / {toBengali(totalActs)} ইবাদত সম্পন্ন
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-6">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -95,9 +95,9 @@ export default function StreakCounter() {
             isDark ? 'bg-amber-500/20 border-amber-400/30' : 'bg-amber-50 border-amber-200'
           }`}
         >
-          <Icon name="fire" className={`text-3xl mb-2 mx-auto ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />
-          <p className={`text-sm ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>বর্তমান স্ট্রিক</p>
-          <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>
+          <Icon name="fire" className={`text-4xl mb-3 mx-auto ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />
+          <p className={`text-base mb-1 ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>বর্তমান স্ট্রিক</p>
+          <p className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>
             {toBengali(state.streak)} দিন
           </p>
         </motion.div>
@@ -110,9 +110,9 @@ export default function StreakCounter() {
             isDark ? 'bg-emerald-500/20 border-emerald-400/30' : 'bg-emerald-50 border-emerald-200'
           }`}
         >
-          <Icon name="calendar" className={`text-3xl mb-2 mx-auto ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
-          <p className={`text-sm ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>সক্রিয় দিন</p>
-          <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>
+          <Icon name="calendar" className={`text-4xl mb-3 mx-auto ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
+          <p className={`text-base mb-1 ${isDark ? 'text-white/60' : 'text-emerald-600'}`}>সক্রিয় দিন</p>
+          <p className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-emerald-900'}`}>
             {toBengali(daysWithProgress)} / ৩০
           </p>
         </motion.div>
@@ -126,8 +126,8 @@ export default function StreakCounter() {
           isDark ? 'bg-white/10 border-white/10' : 'bg-white/80 border-emerald-100 shadow-lg'
         }`}
       >
-        <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-emerald-900'}`}>দৈনিক অগ্রগতি</h3>
-        <div className="flex gap-1 h-24 items-end">
+        <h3 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-emerald-900'}`}>দৈনিক অগ্রগতি</h3>
+        <div className="flex gap-1 h-28 items-end">
           {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => {
             const dailyProgress = getDailyProgress(day);
             const completed = Math.round((dailyProgress / 100) * acts.length);
@@ -153,7 +153,7 @@ export default function StreakCounter() {
             );
           })}
         </div>
-        <div className={`flex justify-between mt-2 text-xs ${isDark ? 'text-white/40' : 'text-emerald-400'}`}>
+        <div className={`flex justify-between mt-3 text-sm ${isDark ? 'text-white/40' : 'text-emerald-400'}`}>
           <span>দিন ১</span>
           <span>দিন ৩০</span>
         </div>

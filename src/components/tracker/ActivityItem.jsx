@@ -59,10 +59,10 @@ export default function ActivityItem({ activity, value, onChange, isLast10Days =
           <button
             onClick={handleBooleanChange}
             className={`
-              w-6 h-6 rounded border-2 flex items-center justify-center text-xs transition-all
+              w-8 h-8 rounded-lg border-2 flex items-center justify-center text-sm font-bold transition-all
               ${localValue 
                 ? 'bg-emerald-500 border-emerald-500 text-white' 
-                : 'border-white/30 hover:border-white/50'
+                : 'border-white/40 hover:border-white/60 bg-white/10'
               }
             `}
           >
@@ -73,19 +73,19 @@ export default function ActivityItem({ activity, value, onChange, isLast10Days =
       case 'counter':
       case 'number':
         return (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => handleCounterChange(-(activity.min || 1))}
-              className="w-6 h-6 rounded bg-white/10 flex items-center justify-center text-xs"
+              className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-lg font-bold"
             >
               -
             </button>
-            <span className="w-8 text-center text-sm font-bold">
+            <span className="w-12 text-center text-base font-bold">
               {toBengali(localValue || 0)}
             </span>
             <button
               onClick={() => handleCounterChange(activity.min || 1)}
-              className="w-6 h-6 rounded bg-emerald-500 flex items-center justify-center text-xs text-white"
+              className="w-10 h-10 rounded-lg bg-emerald-500 flex items-center justify-center text-lg font-bold text-white"
             >
               +
             </button>
@@ -94,19 +94,21 @@ export default function ActivityItem({ activity, value, onChange, isLast10Days =
 
       case 'scale':
         return (
-          <div className="flex gap-0.5">
+          <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((level) => (
               <button
                 key={level}
                 onClick={() => handleScaleChange(level)}
                 className={`
-                  w-5 h-5 rounded text-xs font-bold transition-all
+                  w-8 h-8 rounded-lg text-base font-bold transition-all
                   ${localValue >= level 
                     ? level <= 2 ? 'bg-red-400 text-white' : level <= 3 ? 'bg-amber-400 text-emerald-900' : 'bg-emerald-400 text-emerald-900'
                     : 'bg-white/20'
                   }
                 `}
-              />
+              >
+                {level}
+              </button>
             ))}
           </div>
         );
@@ -118,7 +120,7 @@ export default function ActivityItem({ activity, value, onChange, isLast10Days =
             value={localValue || ''}
             onChange={handleTextChange}
             placeholder="✍️"
-            className="w-full px-2 py-1 text-xs bg-white/10 rounded border-0"
+            className="w-full px-3 py-2 text-sm bg-white/10 rounded-lg border border-white/20"
           />
         );
 
@@ -132,7 +134,7 @@ export default function ActivityItem({ activity, value, onChange, isLast10Days =
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={`
-        flex items-center justify-between gap-2 p-2 rounded-lg border transition-all
+        flex items-center justify-between gap-3 p-3 rounded-xl border transition-all
         ${isCompleted() 
           ? 'bg-emerald-500/20 border-emerald-400/30' 
           : 'bg-white/5 border-white/10 hover:bg-white/10'
@@ -140,11 +142,11 @@ export default function ActivityItem({ activity, value, onChange, isLast10Days =
       `}
     >
       <div className="flex-1 min-w-0">
-        <p className={`text-xs font-medium truncate ${isCompleted() ? 'text-emerald-300' : 'text-white/80'}`}>
+        <p className={`text-sm font-medium truncate ${isCompleted() ? 'text-emerald-300' : 'text-white/90'}`}>
           {activity.name}
         </p>
         {activity.tip && (
-          <p className="text-[10px] text-white/40 truncate">{activity.tip}</p>
+          <p className="text-xs text-white/50 truncate mt-0.5">{activity.tip}</p>
         )}
       </div>
       <div className="flex-shrink-0">

@@ -9,12 +9,12 @@ const toBengali = (num) => {
 };
 
 export default function Dashboard() {
-  const { state, getActs, getDailyProgress, getDayStats, getTotalCompleted, getProgress } = useRamadan();
+  const { state, getAllActivities, getDailyProgress, getCompletedActivitiesCount, getProgress } = useRamadan();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const acts = getActs();
+  const acts = getAllActivities();
   
-  const totalCompleted = getTotalCompleted();
+  const totalCompleted = getCompletedActivitiesCount(state.currentDay);
   const progress = getProgress();
   
   const days = Array.from({ length: 30 }, (_, i) => i + 1);
@@ -171,7 +171,9 @@ export default function Dashboard() {
         <div className="flex gap-1 h-32 items-end">
           {days.map((day) => {
             const p = getDailyProgress(day);
-            const stats = getDayStats(day);
+            const dayData = state.days[day];
+            const completed = getCompletedActivitiesCount(day);
+            const total = acts.length;
             
             return (
               <motion.div
@@ -181,9 +183,9 @@ export default function Dashboard() {
                 transition={{ duration: 0.2, delay: day * 0.01 }}
                 className={`
                   flex-1 rounded-t-sm cursor-pointer transition-colors relative group
-                  ${stats.completed === stats.total 
+                  ${completed === total 
                     ? 'bg-emerald-400' 
-                    : stats.completed > 0 
+                    : completed > 0 
                       ? 'bg-amber-400' 
                       : isDark ? 'bg-white/20' : 'bg-emerald-200'
                   }
@@ -192,7 +194,7 @@ export default function Dashboard() {
                 <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 ${
                   isDark ? 'bg-gray-900 text-white' : 'bg-emerald-900 text-white'
                 }`}>
-                  দিন {toBengali(day)}: {toBengali(stats.completed)}/{toBengali(stats.total)}
+                  দিন {toBengali(day)}: {toBengali(completed)}/{toBengali(total)}
                 </div>
               </motion.div>
             );
@@ -212,8 +214,13 @@ export default function Dashboard() {
         <div className="space-y-3">
           {acts.map((act) => {
             const totalForAct = days.filter(d => {
-              const dayActs = state.days[d]?.acts || {};
-              return dayActs[act.id];
+              const dayActivities = state.days[d]?.activities || {};
+              const value = dayActivities[act.id];
+              if (act.inputType === 'boolean') return value;
+              if (act.inputType === 'text') return value?.length > 10;
+              if (act.inputType === 'scale') return value >= 3;
+              if (act.inputType === 'counter' || act.inputType === 'number') return value > 0;
+              return false;
             }).length;
             const percentage = Math.round((totalForAct / 30) * 100);
             
