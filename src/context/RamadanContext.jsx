@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { getRamadanDates } from '../utils/dateUtils';
-import { RAMADAN_ACTIVITIES, CATEGORIES, INPUT_TYPES, calculateScore, getAllActivities, getDefaultValue } from '../data/activities';
+import { RAMADAN_ACTIVITIES, CATEGORIES, INPUT_TYPES, calculateScore, getAllActivities as getDefaultActivities, getDefaultValue } from '../data/activities';
 import { QURAN_TRACKER, getInitialQuranTracker, QURAN_TRACKING_STORAGE_KEY } from '../data/quranTracker';
 
 const RamadanContext = createContext(null);
@@ -8,7 +8,7 @@ const RamadanContext = createContext(null);
 const STORAGE_KEY = 'my-ramadan-data';
 
 const getInitialDayData = () => {
-  const allActivities = getAllActivities();
+  const allActivities = getDefaultActivities();
   const activitiesData = {};
   
   allActivities.forEach(activity => {
@@ -43,7 +43,8 @@ const getInitialData = () => {
     longestStreak: 0,
     badges: [],
     quranTracker: getInitialQuranTracker(),
-    quranLogs: [] // New state for detailed logs
+    quranLogs: [], // New state for detailed logs
+    customActivities: getDefaultActivities() // Initialize with default activities
   };
 };
 
@@ -148,6 +149,40 @@ function ramadanReducer(state, action) {
     case 'RESET_ALL':
       return getInitialData();
 
+    case 'ADD_ACTIVITY': {
+      const { activity } = action.payload;
+      return {
+        ...state,
+        customActivities: [...state.customActivities, activity]
+      };
+    }
+
+    case 'UPDATE_ACTIVITY': {
+      const { id, updates } = action.payload;
+      return {
+        ...state,
+        customActivities: state.customActivities.map(act =>
+          act.id === id ? { ...act, ...updates } : act
+        )
+      };
+    }
+
+    case 'DELETE_ACTIVITY': {
+      const { id } = action.payload;
+      return {
+        ...state,
+        customActivities: state.customActivities.filter(act => act.id !== id)
+      };
+    }
+
+    case 'REORDER_ACTIVITIES': {
+      const { activities } = action.payload;
+      return {
+        ...state,
+        customActivities: activities
+      };
+    }
+
     default:
       return state;
   }
@@ -166,6 +201,9 @@ export function RamadanProvider({ children }) {
           }
           if (!parsed.quranLogs) {
             parsed.quranLogs = [];
+          }
+          if (!parsed.customActivities) {
+            parsed.customActivities = getDefaultActivities();
           }
           return parsed;
         }
@@ -221,11 +259,20 @@ export function RamadanProvider({ children }) {
   const resetDay = (day) => dispatch({ type: 'RESET_DAY', payload: { day } });
   const resetAll = () => dispatch({ type: 'RESET_ALL' });
 
+  // New actions
+  const addActivity = (activity) => dispatch({ type: 'ADD_ACTIVITY', payload: { activity } });
+  const updateActivity = (id, updates) => dispatch({ type: 'UPDATE_ACTIVITY', payload: { id, updates } });
+  const deleteActivity = (id) => dispatch({ type: 'DELETE_ACTIVITY', payload: { id } });
+  const reorderActivities = (activities) => dispatch({ type: 'REORDER_ACTIVITIES', payload: { activities } });
+
   const getDayData = (day) => state.days[day];
   
   const getActivityValue = (day, actId) => {
     return state.days[day]?.activities?.[actId] || false;
   };
+
+  // Get dynamic activities
+  const getAllActivities = () => state.customActivities || getDefaultActivities();
 
   const getCompletedActivitiesCount = (day) => {
     const dayData = state.days[day];
@@ -306,11 +353,19 @@ export function RamadanProvider({ children }) {
   const getCategories = () => CATEGORIES;
 
   const getCategoryActivities = (categoryId) => {
-    return RAMADAN_ACTIVITIES[categoryId] || [];
+    return getAllActivities().filter(a => a.categoryId === categoryId);
   };
 
   // Helpers for Schedule
-  const todaySchedule = schedule?.ramadan_schedule?.find(d => d.day === state.currentDay);
+  const getTodayRamadanDay = () => {
+    const startDate = new Date('2026-02-19T00:00:00');
+    const now = new Date();
+    const diffTime = now - startDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return diffDays;
+  };
+
+  const todaySchedule = schedule?.ramadan_schedule?.find(d => d.day === getTodayRamadanDay());
 
   return (
     <RamadanContext.Provider value={{
@@ -326,6 +381,10 @@ export function RamadanProvider({ children }) {
       addQuranLog,
       resetDay,
       resetAll,
+      addActivity,
+      updateActivity,
+      deleteActivity,
+      reorderActivities,
       getDayData,
       getActivityValue,
       getCompletedActivitiesCount,
