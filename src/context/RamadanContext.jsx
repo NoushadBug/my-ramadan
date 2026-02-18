@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { getRamadanDates } from '../utils/dateUtils';
 import { RAMADAN_ACTIVITIES, CATEGORIES, INPUT_TYPES, calculateScore, getAllActivities, getDefaultValue } from '../data/activities';
 import { QURAN_TRACKER, getInitialQuranTracker, QURAN_TRACKING_STORAGE_KEY } from '../data/quranTracker';
@@ -42,7 +42,8 @@ const getInitialData = () => {
     streak: 0,
     longestStreak: 0,
     badges: [],
-    quranTracker: getInitialQuranTracker()
+    quranTracker: getInitialQuranTracker(),
+    quranLogs: [] // New state for detailed logs
   };
 };
 
@@ -113,6 +114,14 @@ function ramadanReducer(state, action) {
       };
     }
 
+    case 'ADD_QURAN_LOG': {
+      const { log } = action.payload;
+      return {
+        ...state,
+        quranLogs: [log, ...(state.quranLogs || [])]
+      };
+    }
+
     case 'ADD_BADGE': {
       const badge = action.payload;
       if (state.badges?.includes(badge)) return state;
@@ -145,6 +154,7 @@ function ramadanReducer(state, action) {
 }
 
 export function RamadanProvider({ children }) {
+  const [schedule, setSchedule] = useState(null);
   const [state, dispatch] = useReducer(ramadanReducer, null, () => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -154,6 +164,9 @@ export function RamadanProvider({ children }) {
           if (!parsed.quranTracker) {
             parsed.quranTracker = getInitialQuranTracker();
           }
+          if (!parsed.quranLogs) {
+            parsed.quranLogs = [];
+          }
           return parsed;
         }
       }
@@ -162,6 +175,31 @@ export function RamadanProvider({ children }) {
     }
     return getInitialData();
   });
+
+  // Fetch Ramadan Data
+  useEffect(() => {
+    fetch('/ramadan_data_2026.json')
+      .then(res => res.json())
+      .then(data => setSchedule(data))
+      .catch(err => console.error('Failed to load Ramadan data:', err));
+  }, []);
+
+  // Set Current Day based on Date
+  useEffect(() => {
+    // Start date is Feb 19, 2026
+    const startDate = new Date('2026-02-19T00:00:00');
+    const now = new Date();
+
+    // For testing/demo purposes, if we are not in 2026, we might want to simulate
+    // But adhering to strict logic first:
+    const diffTime = now - startDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    if (diffDays >= 1 && diffDays <= 30) {
+      dispatch({ type: 'SET_CURRENT_DAY', payload: diffDays });
+    }
+    // If not in range, we keep default (1) or user selected day
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -179,6 +217,7 @@ export function RamadanProvider({ children }) {
   const setCustomGoal = (day, goal) => dispatch({ type: 'SET_CUSTOM_GOAL', payload: { day, goal } });
   const setNotes = (day, notes) => dispatch({ type: 'SET_NOTES', payload: { day, notes } });
   const updateQuranTracker = (tracker) => dispatch({ type: 'UPDATE_QURAN_TRACKER', payload: tracker });
+  const addQuranLog = (log) => dispatch({ type: 'ADD_QURAN_LOG', payload: { log } });
   const resetDay = (day) => dispatch({ type: 'RESET_DAY', payload: { day } });
   const resetAll = () => dispatch({ type: 'RESET_ALL' });
 
@@ -270,15 +309,21 @@ export function RamadanProvider({ children }) {
     return RAMADAN_ACTIVITIES[categoryId] || [];
   };
 
+  // Helpers for Schedule
+  const todaySchedule = schedule?.ramadan_schedule?.find(d => d.day === state.currentDay);
+
   return (
     <RamadanContext.Provider value={{
       state,
+      schedule,
+      todaySchedule,
       setActivityValue,
       setReflection,
       setCurrentDay,
       setCustomGoal,
       setNotes,
       updateQuranTracker,
+      addQuranLog,
       resetDay,
       resetAll,
       getDayData,
@@ -295,6 +340,7 @@ export function RamadanProvider({ children }) {
       getCategoryActivities,
       getAllActivities,
       quranTracker: state.quranTracker,
+      quranLogs: state.quranLogs || [],
       CATEGORIES,
       INPUT_TYPES
     }}>
