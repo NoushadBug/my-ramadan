@@ -20,22 +20,33 @@ const parseTime = (timeStr) => {
 };
 
 export default function PrayerTimesWidget() {
-  const { todaySchedule, state, isActualRamadanDay } = useRamadan();
+  const { schedule, state, currentRamadanDay } = useRamadan();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
+  const selectedDay = state.currentDay;
+  const selectedDaySchedule = schedule?.ramadan_schedule?.find(d => d.day === selectedDay);
+  const isToday = selectedDay === currentRamadanDay;
 
   const [timeLeft, setTimeLeft] = useState('');
   const [nextEvent, setNextEvent] = useState('');
 
   useEffect(() => {
-    if (!todaySchedule) return;
+    if (!selectedDaySchedule) return;
+
+    // Only run timer if it is today
+    if (!isToday) {
+      setTimeLeft('');
+      setNextEvent('');
+      return;
+    }
 
     const timer = setInterval(() => {
       const now = new Date();
 
       // Parse times (Assuming Sehri is AM and Iftar is PM)
-      let sehriTime = parseTime(todaySchedule.sehri_end);
-      let iftarTime = parseTime(todaySchedule.iftar);
+      let sehriTime = parseTime(selectedDaySchedule.sehri_end);
+      let iftarTime = parseTime(selectedDaySchedule.iftar);
 
       // Adjust Iftar to PM (add 12 hours if it's afternoon/evening)
       // Standard practice: iftar is usually 5-7 PM.
@@ -74,9 +85,9 @@ export default function PrayerTimesWidget() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [todaySchedule]);
+  }, [selectedDaySchedule, isToday]);
 
-  if (!todaySchedule) {
+  if (!selectedDaySchedule) {
     return (
       <div className={`rounded-2xl p-6 border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-emerald-100'}`}>
         <p className="opacity-50">লোডিং...</p>
@@ -91,10 +102,10 @@ export default function PrayerTimesWidget() {
       <div className="flex justify-between items-start relative z-10">
         <div>
           <h3 className={`text-lg font-bold mb-1 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-            {isActualRamadanDay ? 'আজকের সময়সূচি' : todaySchedule.date}
+            {isToday ? 'আজকের সময়সূচি' : selectedDaySchedule.date}
           </h3>
           <p className={`text-sm ${isDark ? 'text-white/70' : 'text-emerald-600'}`}>
-            {isActualRamadanDay && `${todaySchedule.date} | `}রমজান {toEnglish(todaySchedule.day.toString())}
+            {isToday && `${selectedDaySchedule.date} | `}রমজান {toEnglish(selectedDaySchedule.day.toString())}
           </p>
         </div>
         <div className={`px-3 py-1 rounded-full text-xs font-bold ${
@@ -112,7 +123,7 @@ export default function PrayerTimesWidget() {
             সেহরির শেষ সময়
           </div>
           <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-800'}`}>
-            {todaySchedule.sehri_end}
+            {selectedDaySchedule.sehri_end}
           </div>
         </div>
 
@@ -123,7 +134,7 @@ export default function PrayerTimesWidget() {
             ইফতারের সময়
           </div>
           <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-emerald-800'}`}>
-            {todaySchedule.iftar}
+            {selectedDaySchedule.iftar}
           </div>
         </div>
       </div>
