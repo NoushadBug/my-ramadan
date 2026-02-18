@@ -33,7 +33,7 @@ export default function Settings() {
         </p>
 
         <div className="space-y-4">
-          {CATEGORIES.map((cat) => {
+          {Object.values(CATEGORIES).map((cat) => {
             const catActs = acts.filter(a => a.category === cat.id);
             if (catActs.length === 0) return null;
             
