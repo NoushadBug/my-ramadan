@@ -28,11 +28,7 @@ export default function DayTracker() {
   const isLast10 = isLast10Days(currentDay);
 
   const handleMonthViewClick = () => {
-    if (isDesktop) {
-      setShowMonthModal(true);
-    } else {
-      setViewMode('month');
-    }
+    setShowMonthModal(true);
   };
 
   return (
@@ -110,7 +106,7 @@ export default function DayTracker() {
         )}
       </AnimatePresence>
 
-      {/* Month View Modal (Desktop) */}
+      {/* Month View Modal */}
       <AnimatePresence>
         {showMonthModal && (
           <motion.div
@@ -162,7 +158,7 @@ export default function DayTracker() {
         <button
           onClick={handleMonthViewClick}
           className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-            viewMode === 'month' || (showMonthModal && isDesktop)
+            showMonthModal
               ? isDark ? 'bg-emerald-500 text-white' : 'bg-white text-emerald-700 shadow-sm'
               : isDark ? 'text-white/50 hover:text-white' : 'text-emerald-600/50 hover:text-emerald-700'
           }`}
@@ -173,33 +169,18 @@ export default function DayTracker() {
       </div>
 
       <AnimatePresence mode="wait">
-        {viewMode === 'today' ? (
-          <motion.div
-            key="today"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="space-y-4"
-          >
-            <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-emerald-100'}`}>
-              <h3 className={`font-bold mb-4 ${isDark ? 'text-white' : 'text-emerald-900'}`}>দৈনিক আমল</h3>
-              <SimpleChecklist />
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="month"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="space-y-4"
-          >
-            <div className={`rounded-2xl p-4 border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-emerald-100'}`}>
-                <h3 className={`font-bold mb-4 ${isDark ? 'text-white' : 'text-emerald-900'}`}>পুরো মাসের আমল</h3>
-                <MonthView />
-            </div>
-          </motion.div>
-        )}
+        <motion.div
+          key="today"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="space-y-4"
+        >
+          <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-emerald-100'}`}>
+            <h3 className={`font-bold mb-4 ${isDark ? 'text-white' : 'text-emerald-900'}`}>দৈনিক আমল</h3>
+            <SimpleChecklist />
+          </div>
+        </motion.div>
       </AnimatePresence>
       
       <div className="h-4" />

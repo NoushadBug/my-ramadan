@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRamadan } from '../../context/RamadanContext';
 import { SORTED_ACTIVITIES_LIST } from '../../data/activities';
 import { useTheme } from '../../context/ThemeContext';
@@ -53,6 +53,65 @@ export default function MonthView({ defaultTab }) {
     { id: 'all', label: 'পুরো মাস' },
   ];
 
+  const topScrollRef = useRef(null);
+  const bottomScrollRef = useRef(null);
+  const isSyncing = useRef(false);
+
+  useEffect(() => {
+    if (!bottomScrollRef.current) return;
+
+    // Set initial spacer width
+    const updateSpacer = () => {
+        if (bottomScrollRef.current && topScrollRef.current) {
+            const width = bottomScrollRef.current.scrollWidth;
+            // Only update if significantly different to avoid loops/jitters,
+            // but setting style width is cheap
+            const spacer = topScrollRef.current.firstChild;
+            if (spacer) spacer.style.width = `${width}px`;
+        }
+    };
+
+    updateSpacer();
+
+    // Optional: Update on window resize
+    window.addEventListener('resize', updateSpacer);
+    return () => window.removeEventListener('resize', updateSpacer);
+  }, [activeTab, days]); // Re-measure when content changes
+
+  useEffect(() => {
+    const top = topScrollRef.current;
+    const bottom = bottomScrollRef.current;
+
+    if (!top || !bottom) return;
+
+    const handleScroll = (source) => (e) => {
+        if (isSyncing.current) return;
+        isSyncing.current = true;
+
+        if (source === 'top') {
+            bottom.scrollLeft = e.target.scrollLeft;
+        } else {
+            top.scrollLeft = e.target.scrollLeft;
+        }
+
+        // Reset syncing flag after a short delay (or next frame)
+        requestAnimationFrame(() => {
+            isSyncing.current = false;
+        });
+    };
+
+    const onTopScroll = handleScroll('top');
+    const onBottomScroll = handleScroll('bottom');
+
+    top.addEventListener('scroll', onTopScroll);
+    bottom.addEventListener('scroll', onBottomScroll);
+
+    return () => {
+        top.removeEventListener('scroll', onTopScroll);
+        bottom.removeEventListener('scroll', onBottomScroll);
+    };
+  }, []);
+
   return (
     <div className={`rounded-2xl border overflow-hidden flex flex-col h-full ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-emerald-100'}`}>
       {/* Tabs */}
@@ -76,7 +135,16 @@ export default function MonthView({ defaultTab }) {
         ))}
       </div>
 
-      <div className="flex-1 overflow-auto">
+      {/* Top Scrollbar */}
+      <div
+        ref={topScrollRef}
+        className={`overflow-x-auto border-b sticky top-0 z-30 ${isDark ? 'border-white/10 bg-emerald-900' : 'border-emerald-100 bg-emerald-50'}`}
+        style={{ height: '16px' }} // Explicit height for scrollbar
+      >
+        <div style={{ height: '1px' }}></div>
+      </div>
+
+      <div ref={bottomScrollRef} className="flex-1 overflow-auto">
         <table className="w-full text-xs sm:text-sm border-collapse">
           <thead>
             <tr>
