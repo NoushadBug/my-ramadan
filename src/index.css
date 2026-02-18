@@ -1,8 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap');
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'BengaliNumbers';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/notosansbengali/v33/Cn-SJsCGWQxOjaGwMQ6fIiMywrNJIky6nvd8BjzVMvJx2mcSPVFpVEqE-6KmsolLudA.ttf) format('truetype');
+  unicode-range: U+09E6-09EF;
+  font-display: swap;
+}
+
 @theme {
-  --font-bengali: 'Hind Siliguri', sans-serif;
+  --font-bengali: 'BengaliNumbers', 'Hind Siliguri', sans-serif;
   
   --color-emerald-50: #ecfdf5;
   --color-emerald-100: #d1fae5;

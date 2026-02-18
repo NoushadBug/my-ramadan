@@ -365,13 +365,24 @@ export function RamadanProvider({ children }) {
     return diffDays;
   };
 
-  const todaySchedule = schedule?.ramadan_schedule?.find(d => d.day === getTodayRamadanDay());
+  const getEffectiveRamadanDay = () => {
+    const day = getTodayRamadanDay();
+    if (day < 1) return 1;
+    if (day > 30) return 30;
+    return day;
+  };
+
+  const currentRamadanDay = getTodayRamadanDay();
+  const effectiveDay = getEffectiveRamadanDay();
+  const todaySchedule = schedule?.ramadan_schedule?.find(d => d.day === effectiveDay);
+  const isActualRamadanDay = currentRamadanDay >= 1 && currentRamadanDay <= 30;
 
   return (
     <RamadanContext.Provider value={{
       state,
       schedule,
       todaySchedule,
+      isActualRamadanDay,
       setActivityValue,
       setReflection,
       setCurrentDay,

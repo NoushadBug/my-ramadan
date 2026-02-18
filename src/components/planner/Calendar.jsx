@@ -9,7 +9,7 @@ const toBengali = (num) => {
   return num.toString().split('').map(d => bengaliDigits[parseInt(d)] || d).join('');
 };
 
-export default function Calendar() {
+export default function Calendar({ onSelect }) {
   const { state, setCurrentDay, getDailyProgress } = useRamadan();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -50,7 +50,10 @@ export default function Calendar() {
             return (
               <motion.button
                 key={day}
-                onClick={() => setCurrentDay(day)}
+                onClick={() => {
+                  setCurrentDay(day);
+                  if (onSelect) onSelect(day);
+                }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className={`

@@ -25,7 +25,14 @@ import {
   faFire,
   faTrophy,
   faListCheck,
-  faUser
+  faUser,
+  faBrain,
+  faBullhorn,
+  faLightbulb,
+  faStar,
+  faBookOpen,
+  faWater,
+  faBook
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -54,5 +61,12 @@ library.add(
   faFire,
   faTrophy,
   faListCheck,
-  faUser
+  faUser,
+  faBrain,
+  faBullhorn,
+  faLightbulb,
+  faStar,
+  faBookOpen,
+  faWater,
+  faBook
 );
