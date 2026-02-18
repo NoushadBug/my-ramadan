@@ -17,45 +17,50 @@ export default function SimpleChecklist() {
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+    <div className="flex flex-col gap-2">
       {SORTED_ACTIVITIES_LIST.map((item) => {
         const isCompleted = getActivityValue(currentDay, item.id);
-        const iconColor = item.category?.color || '#10B981';
 
         return (
-          <motion.button
+          <motion.div
             key={item.id}
-            whileTap={{ scale: 0.95 }}
+            initial={false}
+            animate={{
+              backgroundColor: isCompleted
+                ? isDark ? 'rgba(16, 185, 129, 0.2)' : '#ECFDF5'
+                : isDark ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
+              borderColor: isCompleted
+                ? '#10B981'
+                : isDark ? 'rgba(255, 255, 255, 0.1)' : '#F3F4F6'
+            }}
             onClick={() => handleToggle(item.id)}
             className={`
-              relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200 min-h-[110px]
-              ${isCompleted
-                ? isDark
-                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                  : 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-md shadow-emerald-100'
-                : isDark
-                  ? 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'
-                  : 'bg-white border-gray-100 text-gray-500 hover:bg-gray-50'
-              }
+              flex items-center p-3 rounded-xl border cursor-pointer transition-colors relative overflow-hidden group
+              ${isCompleted ? '' : 'hover:border-emerald-200 dark:hover:border-white/20'}
             `}
           >
-            <div className="text-2xl mb-2" style={{ color: isCompleted ? 'inherit' : iconColor }}>
-              <Icon name={item.icon} />
+            {/* Checkbox */}
+            <div className={`
+              w-6 h-6 rounded-md border flex items-center justify-center transition-colors mr-3 shrink-0
+              ${isCompleted
+                ? 'bg-emerald-500 border-emerald-500 text-white'
+                : isDark ? 'border-white/30 group-hover:border-emerald-400' : 'border-gray-300 group-hover:border-emerald-400'
+              }
+            `}>
+              {isCompleted && <Icon name="check" className="text-xs" />}
             </div>
-            <span className="text-xs sm:text-sm font-bold text-center leading-tight line-clamp-2" title={item.name}>
+
+            {/* Text */}
+            <span className={`
+              flex-1 font-medium text-sm sm:text-base transition-colors
+              ${isCompleted
+                ? isDark ? 'text-emerald-400' : 'text-emerald-800'
+                : isDark ? 'text-white/90' : 'text-gray-700'
+              }
+            `}>
               {item.name}
             </span>
-
-            {isCompleted && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute top-2 right-2 text-emerald-500"
-              >
-                <Icon name="check" className="text-xs" />
-              </motion.div>
-            )}
-          </motion.button>
+          </motion.div>
         );
       })}
     </div>
