@@ -5,7 +5,6 @@ import { useTheme } from '../../context/ThemeContext';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import Icon from '../Icon';
 import MonthView from './MonthView';
-import MobileMonthView from './MobileMonthView';
 import SimpleChecklist from './SimpleChecklist';
 import PrayerTimesWidget from '../dashboard/PrayerTimesWidget';
 import Calendar from '../planner/Calendar';
@@ -57,7 +56,7 @@ export default function DayTracker() {
             onClick={() => setShowCalendar(true)}
             className="text-center group"
           >
-            <h2 className={`text-xl sm:text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-emerald-900'}`}>
+            <h2 className={`text-lg sm:text-2xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-emerald-900'}`}>
               রমজান {toBengali(currentDay)}
               <Icon name="calendar" className="text-sm opacity-50 group-hover:opacity-100 transition-opacity" />
             </h2>
@@ -197,7 +196,7 @@ export default function DayTracker() {
           >
             <div className={`rounded-2xl p-4 border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-emerald-100'}`}>
                 <h3 className={`font-bold mb-4 ${isDark ? 'text-white' : 'text-emerald-900'}`}>পুরো মাসের আমল</h3>
-                <MobileMonthView />
+                <MonthView />
             </div>
           </motion.div>
         )}

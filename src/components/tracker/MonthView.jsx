@@ -77,10 +77,10 @@ export default function MonthView({ defaultTab }) {
       </div>
 
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-sm border-collapse">
+        <table className="w-full text-xs sm:text-sm border-collapse">
           <thead>
             <tr>
-              <th className={`p-2 sticky left-0 top-0 z-20 text-left min-w-[200px] sm:min-w-[250px] border-b border-r ${
+              <th className={`p-2 sticky left-0 top-0 z-20 text-left min-w-[140px] sm:min-w-[250px] border-b border-r ${
                 isDark ? 'bg-gray-900 border-white/10 text-white' : 'bg-emerald-50 border-emerald-100 text-emerald-900'
               }`}>
                 আমল
@@ -97,7 +97,7 @@ export default function MonthView({ defaultTab }) {
           <tbody>
             {SORTED_ACTIVITIES_LIST.map((activity, idx) => (
               <tr key={activity.id} className={isDark ? 'hover:bg-white/5' : 'hover:bg-emerald-50/50'}>
-                <td className={`p-2 sticky left-0 z-10 font-medium border-b border-r flex items-center gap-2 ${
+                <td className={`p-1 sm:p-2 sticky left-0 z-10 font-medium border-b border-r flex items-center gap-2 ${
                   isDark ? 'bg-gray-900 border-white/10 text-white' : 'bg-white border-emerald-100 text-emerald-800'
                 }`}>
                   <div className={`w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-full flex items-center justify-center text-[10px] sm:text-xs ${
@@ -105,7 +105,7 @@ export default function MonthView({ defaultTab }) {
                   }`}>
                     {toBengali(idx + 1)}
                   </div>
-                  <span className="truncate max-w-[180px] sm:max-w-full" title={activity.name}>{activity.name}</span>
+                  <span className="truncate max-w-[100px] sm:max-w-full" title={activity.name}>{activity.name}</span>
                 </td>
                 {days.map(day => {
                   const dayData = state.days[day];
