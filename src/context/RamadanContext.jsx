@@ -383,6 +383,7 @@ export function RamadanProvider({ children }) {
       schedule,
       todaySchedule,
       isActualRamadanDay,
+      currentRamadanDay,
       setActivityValue,
       setReflection,
       setCurrentDay,

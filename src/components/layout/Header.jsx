@@ -18,9 +18,11 @@ export default function Header() {
     >
       <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center shadow-lg">
-            <Icon name="moon" className="text-emerald-900 text-lg" />
-          </div>
+          <img
+            src="https://cdn.iconscout.com/icon/free/png-256/free-islamic-lantern-icon-svg-download-png-12100616.png"
+            alt="Islamic Lantern"
+            className="w-10 h-10"
+          />
           <div>
             <h1 className={`text-xl font-bold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-emerald-900'}`}>আমার রমজান</h1>
             <p className={`text-xs ${theme === 'dark' ? 'text-emerald-200' : 'text-emerald-700'}`}>রমজান ১৪৪৭</p>
