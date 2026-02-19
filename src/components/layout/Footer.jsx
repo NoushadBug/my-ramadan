@@ -4,10 +4,10 @@ export default function Footer() {
   const { theme } = useTheme();
 
   return (
-    <footer className={`py-6 text-sm mt-auto border-t ${
+    <footer className={`py-6 text-sm mt-auto border-t bg-[#ffffff3d] ${
       theme === 'dark'
         ? 'border-white/10 text-emerald-200/60'
-        : 'border-emerald-100 text-emerald-800/60'
+        : 'border-emerald-100 text-black'
     }`}>
       <div className="max-w-3xl mx-auto px-4 flex items-center justify-between">
         <p className="font-medium">Ramadan Companion</p>
