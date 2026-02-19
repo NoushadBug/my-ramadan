@@ -18,14 +18,15 @@ export default function TabNav({ activeTab, setActiveTab }) {
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3, delay: 0.1 }}
-      className="flex justify-center gap-3 py-4 flex-wrap px-2"
+      className="flex justify-center gap-2 md:gap-3 py-3 md:py-4 flex-wrap px-2"
     >
       {tabs.map((tab) => (
         <motion.button
           key={tab.id}
+          layout
           onClick={() => setActiveTab(tab.id)}
           className={`
-            relative px-5 py-3 rounded-xl font-semibold text-base transition-all duration-200 flex items-center gap-2
+            relative px-3 py-2 md:px-5 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-200 flex items-center gap-2
             ${activeTab === tab.id 
               ? theme === 'dark'
                 ? 'text-emerald-900 bg-white shadow-lg' 
@@ -49,7 +50,9 @@ export default function TabNav({ activeTab, setActiveTab }) {
           )}
           <span className="relative z-10 flex items-center gap-2">
             <Icon name={tab.icon} className="text-lg" />
-            <span>{tab.label}</span>
+            <span className={`${activeTab === tab.id ? 'block' : 'hidden md:block'}`}>
+              {tab.label}
+            </span>
           </span>
         </motion.button>
       ))}
