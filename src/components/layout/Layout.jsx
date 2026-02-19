@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from './Header';
 import TabNav from './TabNav';
+import Footer from './Footer';
 import Icon from '../Icon';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -26,6 +27,7 @@ export default function Layout({ children, activeTab, setActiveTab }) {
           </motion.div>
         </AnimatePresence>
       </main>
+      <Footer />
     </div>
   );
 }
