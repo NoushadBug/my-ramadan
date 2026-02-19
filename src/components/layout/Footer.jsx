@@ -4,13 +4,13 @@ export default function Footer() {
   const { theme } = useTheme();
 
   return (
-    <footer className={`py-6 text-sm mt-auto border-t ${
+    <footer className={`py-8 text-base font-semibold mt-auto border-t ${
       theme === 'dark'
-        ? 'border-white/10 text-emerald-200/60'
-        : 'border-emerald-100 text-emerald-800/60'
+        ? 'border-white/10 text-emerald-200/80 bg-black/20'
+        : 'border-emerald-100 text-emerald-800/80 bg-emerald-50'
     }`}>
       <div className="max-w-3xl mx-auto px-4 flex items-center justify-between">
-        <p className="font-medium">Ramadan Companion</p>
+        <p>Ramadan Companion</p>
         <div className="flex items-center gap-2">
           <span>Powered by</span>
           <a
@@ -24,7 +24,7 @@ export default function Footer() {
               alt="Activight"
               className="h-8 w-8 bg-white rounded-full p-1 shadow-sm"
             />
-            <span className="font-semibold">Activight</span>
+            <span>Activight</span>
           </a>
         </div>
       </div>
