@@ -4,7 +4,7 @@ export default function Footer() {
   const { theme } = useTheme();
 
   return (
-    <footer className={`py-6 text-sm mt-auto border-t ${
+    <footer className={`py-6 text-sm mt-auto border-t bg-[#1b1b212e] ${
       theme === 'dark'
         ? 'border-white/10 text-emerald-200/60'
         : 'border-emerald-100 text-emerald-800/60'
